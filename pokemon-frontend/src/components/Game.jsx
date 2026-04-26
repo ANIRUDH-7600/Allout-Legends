@@ -14,6 +14,13 @@ const SIDE_GATE_Y_MAX = 15;
 const VERTICAL_GATE_X_MIN = 14;
 const VERTICAL_GATE_X_MAX = 15;
 
+// localStorage keys
+const STORAGE_KEYS = {
+  PAINT_LOG: "allout_legends_paint_log",
+  CURRENT_MAP: "allout_legends_current_map",
+  PLAYER_POS: "allout_legends_player_pos",
+};
+
 function isAtSideGate(y) {
   return y >= SIDE_GATE_Y_MIN && y <= SIDE_GATE_Y_MAX;
 }
@@ -22,23 +29,84 @@ function isAtVerticalGate(x) {
   return x >= VERTICAL_GATE_X_MIN && x <= VERTICAL_GATE_X_MAX;
 }
 
+// Helper: Load saved paint log from localStorage
+function loadSavedPaintLog() {
+  const saved = localStorage.getItem(STORAGE_KEYS.PAINT_LOG);
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch (e) {
+      console.error("Failed to load paint log:", e);
+      return { map1: [], map2: [], map5: [], map6: [] };
+    }
+  }
+  return { map1: [], map2: [], map5: [], map6: [] };
+}
+
+// Helper: Apply saved overrides to maps
+function applySavedOverridesToMaps(savedLog) {
+  Object.keys(savedLog).forEach(mapName => {
+    const overrides = savedLog[mapName];
+    if (overrides && maps[mapName]) {
+      overrides.forEach(({ x, y, id }) => {
+        if (maps[mapName][y] && maps[mapName][y][x] !== undefined) {
+          maps[mapName][y][x] = id;
+        }
+      });
+    }
+  });
+}
+
 export default function Game() {
-  const [player, setPlayer] = useState({ x: 2, y: 2 });
+  // Load saved player position OR default to { x: 2, y: 2 }
+  const getInitialPlayerPos = () => {
+    const saved = localStorage.getItem(STORAGE_KEYS.PLAYER_POS);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return { x: 2, y: 2 };
+      }
+    }
+    return { x: 2, y: 2 };
+  };
+
+  const getInitialCurrentMap = () => {
+    const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_MAP);
+    return saved && (saved === "map1" || saved === "map2" || saved === "map5" || saved === "map6") 
+      ? saved 
+      : "map1";
+  };
+
+  const [player, setPlayer] = useState(getInitialPlayerPos);
   const [gameState, setGameState] = useState("map");
-  const [currentMap, setCurrentMap] = useState("map1");
+  const [currentMap, setCurrentMap] = useState(getInitialCurrentMap);
   const [pressedKey, setPressedKey] = useState(null);
   const [transition, setTransition] = useState(false);
   const [paintMode, setPaintMode] = useState(false);
   const [selectedTileId, setSelectedTileId] = useState(0);
   const [fillStart, setFillStart] = useState(null);
   const [exportStatus, setExportStatus] = useState("");
-  const [paintLog, setPaintLog] = useState({
-    map1: [],
-    map2: [],
-    map5: [],
-    map6: [],
+  
+  // Load saved paint log on startup
+  const [paintLog, setPaintLog] = useState(() => {
+    const savedLog = loadSavedPaintLog();
+    // Apply saved overrides to maps immediately
+    applySavedOverridesToMaps(savedLog);
+    return savedLog;
   });
+  
   const current = maps[currentMap];
+
+  // Save player position whenever it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.PLAYER_POS, JSON.stringify(player));
+  }, [player]);
+
+  // Save current map whenever it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.CURRENT_MAP, currentMap);
+  }, [currentMap]);
 
   const camera = useMemo(() => {
     const mapW = current[0].length * TILE;
@@ -164,10 +232,12 @@ export default function Game() {
           }
         });
 
-        return {
+        const newLog = {
           ...prev,
           [currentMap]: list,
         };
+        
+        return newLog;
       });
     };
 
@@ -217,6 +287,82 @@ export default function Game() {
     console.log(`[${x}, ${y}, ${clampedTileId}],`);
   }, [paintMode, current, selectedTileId, currentMap, fillStart]);
 
+  // NEW: Save all paint edits to localStorage permanently
+  const handleSaveToLocalStorage = useCallback(() => {
+    try {
+      // Save the current paint log to localStorage
+      localStorage.setItem(STORAGE_KEYS.PAINT_LOG, JSON.stringify(paintLog));
+      
+      // Also save current map and player position
+      localStorage.setItem(STORAGE_KEYS.CURRENT_MAP, currentMap);
+      localStorage.setItem(STORAGE_KEYS.PLAYER_POS, JSON.stringify(player));
+      
+      // Count total edits
+      const totalEdits = Object.values(paintLog).reduce((sum, arr) => sum + arr.length, 0);
+      setExportStatus(`✅ Saved ${totalEdits} tile edits to browser storage! (Will persist after refresh)`);
+      
+      // Optional: Show success message that disappears after 3 seconds
+      setTimeout(() => {
+        if (exportStatus.includes("✅")) setExportStatus("");
+      }, 3000);
+    } catch (error) {
+      console.error("Failed to save to localStorage:", error);
+      setExportStatus("❌ Save failed! Storage may be full or disabled.");
+    }
+  }, [paintLog, currentMap, player]);
+
+  // NEW: Load saved edits from localStorage (manual reload)
+  const handleLoadFromLocalStorage = useCallback(() => {
+    try {
+      const savedLog = loadSavedPaintLog();
+      
+      // Apply overrides to the actual map data
+      Object.keys(savedLog).forEach(mapName => {
+        const overrides = savedLog[mapName];
+        if (overrides && maps[mapName]) {
+          overrides.forEach(({ x, y, id }) => {
+            if (maps[mapName][y] && maps[mapName][y][x] !== undefined) {
+              maps[mapName][y][x] = id;
+            }
+          });
+        }
+      });
+      
+      setPaintLog(savedLog);
+      setExportStatus(`📂 Loaded ${Object.values(savedLog).reduce((sum, arr) => sum + arr.length, 0)} saved edits!`);
+      
+      setTimeout(() => {
+        if (exportStatus.includes("📂")) setExportStatus("");
+      }, 3000);
+    } catch (error) {
+      console.error("Failed to load from localStorage:", error);
+      setExportStatus("❌ Load failed!");
+    }
+  }, []);
+
+  // NEW: Clear ALL saved data (reset everything)
+  const handleResetAllData = useCallback(() => {
+    if (window.confirm("⚠️ WARNING: This will delete ALL saved map edits and reset player position! This cannot be undone. Continue?")) {
+      try {
+        // Clear localStorage
+        localStorage.removeItem(STORAGE_KEYS.PAINT_LOG);
+        localStorage.removeItem(STORAGE_KEYS.CURRENT_MAP);
+        localStorage.removeItem(STORAGE_KEYS.PLAYER_POS);
+        
+        // Reset state
+        setPaintLog({ map1: [], map2: [], map5: [], map6: [] });
+        setCurrentMap("map1");
+        setPlayer({ x: 2, y: 2 });
+        
+        // Reload the page to reset maps to original
+        window.location.reload();
+      } catch (error) {
+        console.error("Failed to reset:", error);
+        setExportStatus("❌ Reset failed!");
+      }
+    }
+  }, []);
+
   const handleExportOverrides = useCallback(async () => {
     const entries = (paintLog[currentMap] || [])
       .slice()
@@ -256,6 +402,13 @@ export default function Game() {
         return;
       }
 
+      // NEW: Ctrl+S shortcut to save
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        handleSaveToLocalStorage();
+        return;
+      }
+
       if (paintMode) {
         if (e.key === "[" || e.key === "-") {
           e.preventDefault();
@@ -284,7 +437,7 @@ export default function Game() {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, [handleMove, paintMode]);
+  }, [handleMove, paintMode, handleSaveToLocalStorage]);
 
   // D-pad click handler
   const handleDpad = (dir) => {
@@ -343,6 +496,9 @@ export default function Game() {
     tileType === 33 ? "Mushrooms" :
     "Grass";
 
+  // Calculate total saved edits for display
+  const totalSavedEdits = Object.values(paintLog).reduce((sum, arr) => sum + arr.length, 0);
+
   return (
     <div className="game-container">
       <div className="layout">
@@ -385,6 +541,12 @@ export default function Game() {
                 <div className="meta-row">
                   <span className="meta-label">Terrain</span>
                   <span className="meta-value">{terrainName}</span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">Saved Edits</span>
+                  <span className="meta-value" style={{ color: totalSavedEdits > 0 ? "#43a047" : "#999" }}>
+                    {totalSavedEdits} tiles
+                  </span>
                 </div>
               </div>
 
@@ -450,14 +612,42 @@ export default function Game() {
                   />
                 </div>
 
+                {/* NEW: Save/Load/Reset Buttons */}
+                <div className="paint-row">
+                  <button
+                    type="button"
+                    className="paint-action-btn"
+                    onClick={handleSaveToLocalStorage}
+                    style={{ background: "#43a047", color: "white", fontWeight: "bold" }}
+                  >
+                    💾 SAVE
+                  </button>
+                  <button
+                    type="button"
+                    className="paint-action-btn"
+                    onClick={handleLoadFromLocalStorage}
+                  >
+                    📂 LOAD
+                  </button>
+                  <button
+                    type="button"
+                    className="paint-action-btn"
+                    onClick={handleResetAllData}
+                    style={{ background: "#d32f2f", color: "white" }}
+                  >
+                    🗑 RESET
+                  </button>
+                </div>
+
                 <div className="paint-hint">Press P to toggle, [ / ] to change ID, click map to paint.</div>
                 <div className="paint-hint">Shift+click = rectangle fill. Right-click = erase to id 0.</div>
+                <div className="paint-hint">💾 Click SAVE to persist edits (Ctrl+S shortcut)</div>
                 {fillStart && <div className="paint-hint">Fill start: ({fillStart.x}, {fillStart.y})</div>}
                 <div className="paint-actions">
-                  <button type="button" className="paint-action-btn" onClick={handleExportOverrides}>Export</button>
+                  <button type="button" className="paint-action-btn" onClick={handleExportOverrides}>Export Code</button>
                   <button type="button" className="paint-action-btn" onClick={clearPaintLogForCurrentMap}>Clear Log</button>
                 </div>
-                {exportStatus && <div className="paint-hint">{exportStatus}</div>}
+                {exportStatus && <div className="paint-hint" style={{ color: exportStatus.includes("✅") ? "#43a047" : exportStatus.includes("❌") ? "#d32f2f" : "#ffa000" }}>{exportStatus}</div>}
                 <pre className="paint-output">{currentPaintLines || "// no edits yet"}</pre>
               </div>
             </aside>
