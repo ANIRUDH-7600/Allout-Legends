@@ -87,6 +87,7 @@ export default function Game() {
   const [selectedTileId, setSelectedTileId] = useState(0);
   const [fillStart, setFillStart] = useState(null);
   const [exportStatus, setExportStatus] = useState("");
+  const [encounterArea, setEncounterArea] = useState("grass");
   
   // Load saved paint log on startup
   const [paintLog, setPaintLog] = useState(() => {
@@ -207,10 +208,13 @@ export default function Game() {
       return;
     }
 
+    // Normal movement with encounter check
     const newPos = movePlayer(player, key, current);
     if (newPos.x !== player.x || newPos.y !== player.y) {
       setPlayer(newPos);
-      if (checkEncounter(newPos.x, newPos.y, current)) {
+      const encounter = checkEncounter(newPos.x, newPos.y, current);
+      if (encounter.shouldBattle) {
+        setEncounterArea(encounter.area);
         setGameState("battle");
       }
     }
@@ -779,7 +783,7 @@ export default function Game() {
         )}
 
         {gameState === "battle" && (
-          <Battle exitBattle={() => setGameState("map")} />
+          <Battle exitBattle={() => setGameState("map")} area={encounterArea} />
         )}
       </div>
     </div>

@@ -1,5 +1,4 @@
 // pokemon-frontend/src/logic/movement.js
-
 import { isWalkable } from "../data/masterTileset";
 
 export function movePlayer(player, key, map) {

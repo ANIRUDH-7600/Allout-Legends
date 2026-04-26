@@ -2184,3 +2184,28 @@ export const TILE_INFO = {
 export function getTileInfo(id) {
   return TILE_INFO[id] || { name: "Unknown", image: "unknown", file: "unknown" };
 }
+
+// Add at the end of tileIds.js
+
+// Helper to check tile types
+export function isWalkableTile(tileId) {
+  // Ground tiles (88-227) are walkable
+  if (tileId >= 88 && tileId <= 227) return true;
+  // Trigger tiles (1071-1082) are walkable
+  if (tileId >= 1071 && tileId <= 1082) return true;
+  // Path tiles (certain IDs in ground tileset)
+  if (tileId === 0 || tileId === 88) return true; // Path tiles
+  // All others are blocked
+  return false;
+}
+
+export function getEncounterRateForTile(tileId) {
+  // Tall grass (ID 2 in ground tileset - adjust based on your mapping)
+  if (tileId === 2 || tileId === 90) return 0.1; // 10% encounter
+  // Normal grass
+  if (tileId === 3 || tileId === 91) return 0.05; // 5% encounter
+  // Dense grass (ID 23)
+  if (tileId === 23) return 0.15; // 15% encounter
+  // All others no encounters
+  return 0;
+}
