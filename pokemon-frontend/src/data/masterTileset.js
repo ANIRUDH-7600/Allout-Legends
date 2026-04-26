@@ -1,110 +1,136 @@
 // pokemon-frontend/src/data/masterTileset.js
-// Generated: 26/4/2026, 10:32:59 pm
 
 export const MASTER_TILESET = {
   renderSize: 64,
   tilesets: [
+    // ============ PATHS & BASIC TERRAIN (IDs 0-87) ============
+    // These match the tile IDs used in your maps.js
     {
-      id: "fence-snow",
-      name: "fence-snow",
-      imagePath: "/assets/tiles/fence-snow.png",
+      id: "paths",
+      name: "Paths & Basic",
+      imagePath: "/assets/tiles/ground.png",
       tileWidth: 32,
       tileHeight: 32,
       startId: 0,
       endId: 87,
-      walkable: false,  // ← Fences should block movement
+      walkable: true,
       encounterRate: 0,
+      description: "Paths, routes, and basic terrain"
     },
+    
+    // ============ GROUND TERRAIN (IDs 88-227) ============
     {
       id: "ground",
-      name: "ground",
+      name: "Ground Terrain",
       imagePath: "/assets/tiles/ground.png",
       tileWidth: 32,
       tileHeight: 32,
       startId: 88,
       endId: 227,
-      walkable: true,   // ← Ground is walkable
-      encounterRate: 0.08,  // 8% encounter rate in grass
+      walkable: true,
+      encounterRate: 0.08,
+      description: "Grass, dirt, sand, and natural ground"
     },
+    
+    // ============ SNOW HOUSES (IDs 228-395) ============
     {
       id: "houses-snow",
-      name: "houses-snow",
+      name: "Snow Houses",
       imagePath: "/assets/tiles/houses-snow.png",
       tileWidth: 32,
       tileHeight: 32,
       startId: 228,
       endId: 395,
-      walkable: false,  // ← Houses block movement
+      walkable: false,
       encounterRate: 0,
+      description: "Snow-covered buildings and structures"
     },
+    
+    // ============ REGULAR HOUSES (IDs 396-720) ============
     {
       id: "houses",
-      name: "houses",
+      name: "Houses",
       imagePath: "/assets/tiles/houses.png",
       tileWidth: 32,
       tileHeight: 32,
       startId: 396,
       endId: 720,
-      walkable: false,  // ← Houses block movement
+      walkable: false,
       encounterRate: 0,
+      description: "Regular buildings and structures"
     },
+    
+    // ============ SNOW ROCKS (IDs 721-752) ============
     {
       id: "rock-snow",
-      name: "rock-snow",
+      name: "Snow Rocks",
       imagePath: "/assets/tiles/rock-snow.png",
       tileWidth: 32,
       tileHeight: 32,
       startId: 721,
       endId: 752,
-      walkable: false,  // ← Rocks block movement
+      walkable: false,
       encounterRate: 0,
+      description: "Snow-covered rocks and boulders"
     },
+    
+    // ============ REGULAR ROCKS (IDs 753-856) ============
     {
       id: "rocks",
-      name: "rocks",
+      name: "Rocks",
       imagePath: "/assets/tiles/rocks.png",
       tileWidth: 32,
       tileHeight: 32,
       startId: 753,
       endId: 856,
-      walkable: false,  // ← Rocks block movement
+      walkable: false,
       encounterRate: 0,
+      description: "Rocks, boulders, and stone features"
     },
+    
+    // ============ SNOW TREES (IDs 857-926) ============
     {
       id: "trees-snow",
-      name: "trees-snow",
+      name: "Snow Trees",
       imagePath: "/assets/tiles/trees-snow.png",
       tileWidth: 32,
       tileHeight: 32,
       startId: 857,
       endId: 926,
-      walkable: false,  // ← Trees block movement
+      walkable: false,
       encounterRate: 0,
+      description: "Snow-covered trees"
     },
+    
+    // ============ REGULAR TREES (IDs 927-1070) ============
     {
-      id: "trees3",
-      name: "trees3",
+      id: "trees",
+      name: "Trees",
       imagePath: "/assets/tiles/trees4.png",
       tileWidth: 32,
       tileHeight: 32,
       startId: 927,
       endId: 1070,
-      walkable: false,  // ← Trees block movement
+      walkable: false,
       encounterRate: 0,
+      description: "Regular trees and foliage"
     },
+    
+    // ============ TRIGGERS (IDs 1071-1082) ============
     {
       id: "triggers",
-      name: "triggers",
+      name: "Triggers",
       imagePath: "/assets/tiles/triggers.png",
       tileWidth: 32,
       tileHeight: 32,
       startId: 1071,
       endId: 1082,
-      walkable: true,   // ← Triggers are walkable (invisible events)
+      walkable: true,
       encounterRate: 0,
       isTrigger: true,
-    },
-  ],
+      description: "Event triggers (invisible)"
+    }
+  ]
 };
 
 // Helper: Find which tileset contains a tile ID
@@ -120,8 +146,10 @@ export function getTileFrame(tileId) {
   if (!tileset) return null;
   
   const localId = tileId - tileset.startId;
-  const col = localId % 15; // Assuming 15 columns based on your original
-  const row = Math.floor(localId / 15);
+  // Calculate grid position (adjust columns based on your actual sprite sheet)
+  const columns = 15; // Your ground.png has 15 columns
+  const col = localId % columns;
+  const row = Math.floor(localId / columns);
   
   return {
     tileId,
@@ -144,8 +172,15 @@ export function getTileStyle(tileId, renderSize = 64) {
   if (!frame) return {};
   
   const scale = renderSize / frame.width;
-  const atlasWidth = 15 * frame.width;  // 15 columns
-  const atlasHeight = Math.ceil(1083 / 15) * frame.height;
+  const tileset = findTileset(tileId);
+  if (!tileset) return {};
+  
+  // Calculate total atlas size
+  const columns = 15;
+  const totalTiles = tileset.endId - tileset.startId + 1;
+  const rows = Math.ceil(totalTiles / columns);
+  const atlasWidth = columns * frame.width;
+  const atlasHeight = rows * frame.height;
   
   return {
     backgroundImage: `url('${frame.imagePath}')`,
@@ -154,6 +189,7 @@ export function getTileStyle(tileId, renderSize = 64) {
     width: `${renderSize}px`,
     height: `${renderSize}px`,
     imageRendering: 'pixelated',
+    backgroundRepeat: 'no-repeat',
   };
 }
 
@@ -167,6 +203,12 @@ export function isWalkable(tileId) {
 export function getEncounterRate(tileId) {
   const tileset = findTileset(tileId);
   return tileset ? tileset.encounterRate : 0;
+}
+
+// Get tile description
+export function getTileDescription(tileId) {
+  const tileset = findTileset(tileId);
+  return tileset ? tileset.description : "Unknown tile";
 }
 
 export default MASTER_TILESET;
