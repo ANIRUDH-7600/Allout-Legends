@@ -1,0 +1,532 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #35363f;
+  font-family: 'Press Start 2P', monospace;
+}
+
+.game-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.world-main {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.realm-bar {
+  width: 640px;
+  height: 44px;
+  border-radius: 22px;
+  background: #ececee;
+  border: 3px solid #3a3a3f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #121212;
+  font-size: 9px;
+  letter-spacing: 0.6px;
+}
+
+.realm-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.realm-title {
+  text-transform: uppercase;
+}
+
+.realm-help {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid #3a3a3f;
+  background: #d3d5d9;
+  color: #111;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: default;
+}
+
+.map-stage {
+  position: relative;
+}
+
+.viewport {
+  width: 640px;
+  height: 480px;
+  overflow: hidden;
+  position: relative;
+  background: #b6f09e;
+  border: 3px solid #2f2f34;
+}
+
+.map {
+  position: absolute;
+  display: grid;
+  image-rendering: pixelated;
+}
+
+.paint-mode .tile {
+  cursor: crosshair;
+}
+
+.player {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  transform: translate(-50%, -66%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.player-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35));
+}
+
+.deluge-panel {
+  width: 290px;
+  height: 480px;
+  background: #d6d8de;
+  border-radius: 22px;
+  border: 3px solid #2f2f34;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.search-panel {
+  flex: 1;
+  background: #b9ec98;
+  border-radius: 16px 16px 0 0;
+  border: 2px solid #95c278;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+}
+
+.search-message {
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  color: #0f0f0f;
+}
+
+.panel-meta {
+  padding: 10px 6px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 8px;
+}
+
+.meta-label {
+  color: #383a3f;
+}
+
+.meta-value {
+  color: #17181b;
+}
+
+.controls-pad {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.pad-grid {
+  position: relative;
+  width: 130px;
+  height: 130px;
+}
+
+.pad-btn {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: #0f0f12;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.08s ease;
+}
+
+.pad-btn.up {
+  top: 10px;
+  left: 49px;
+  clip-path: polygon(50% 0, 0 100%, 100% 100%);
+}
+
+.pad-btn.down {
+  bottom: 10px;
+  left: 49px;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.pad-btn.left {
+  left: 10px;
+  top: 49px;
+  clip-path: polygon(0 50%, 100% 0, 100% 100%);
+}
+
+.pad-btn.right {
+  right: 10px;
+  top: 49px;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.pad-btn.pressed,
+.pad-btn:active {
+  transform: scale(0.9);
+  background: #2a2a2f;
+}
+
+.pad-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 3px solid #151517;
+  background: #ececee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pad-center img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.keyboard-toggle {
+  margin-top: auto;
+  font-size: 7px;
+  color: #191a1f;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.keyboard-toggle input {
+  width: 14px;
+  height: 14px;
+}
+
+.paint-tools {
+  margin-top: 8px;
+  border-top: 2px solid #a8adb8;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.paint-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 8px;
+}
+
+.paint-toggle {
+  min-width: 44px;
+  height: 22px;
+  border: 2px solid #343844;
+  border-radius: 4px;
+  background: #d9dce2;
+  color: #12131a;
+  font-size: 8px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.paint-toggle.on {
+  background: #8dd06f;
+}
+
+.paint-input {
+  width: 70px;
+  height: 22px;
+  border: 2px solid #343844;
+  border-radius: 4px;
+  padding: 0 6px;
+  font-size: 8px;
+  font-family: inherit;
+  background: #f5f7fb;
+  color: #0f1016;
+}
+
+.paint-hint {
+  font-size: 6px;
+  line-height: 1.6;
+  color: #2a2f3b;
+}
+
+.paint-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.paint-action-btn {
+  min-width: 48px;
+  height: 22px;
+  border: 2px solid #343844;
+  border-radius: 4px;
+  background: #d9dce2;
+  color: #12131a;
+  font-size: 8px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.paint-action-btn:hover {
+  background: #c8cdd8;
+}
+
+.paint-output {
+  max-height: 90px;
+  overflow: auto;
+  border: 2px solid #a8adb8;
+  border-radius: 4px;
+  background: #f5f7fb;
+  padding: 6px;
+  font-size: 6px;
+  line-height: 1.6;
+  color: #11151f;
+  white-space: pre;
+}
+
+/* ── Battle screen ── */
+.battle-container {
+  width: 900px;
+  height: 480px;
+  background: linear-gradient(180deg, #1565c0 0%, #0d47a1 50%, #5d4037 50%, #4e342e 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.battle-scene {
+  flex: 1;
+  position: relative;
+}
+
+/* Enemy side */
+.enemy-area {
+  position: absolute;
+  top: 20px;
+  right: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.enemy-card {
+  background: rgba(255,255,255,0.95);
+  border: 2px solid #333;
+  border-radius: 4px;
+  padding: 8px 12px;
+  min-width: 160px;
+}
+
+.enemy-name {
+  font-size: 7px;
+  color: #222;
+  margin-bottom: 4px;
+}
+
+.enemy-level {
+  font-size: 6px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.battle-hp-bar {
+  height: 8px;
+  background: #ddd;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.battle-hp-fill {
+  height: 100%;
+  background: #43a047;
+  border-radius: 4px;
+  transition: width 0.5s;
+}
+
+.battle-hp-fill.medium { background: #ffa000; }
+.battle-hp-fill.low { background: #d32f2f; }
+
+.enemy-sprite {
+  width: 80px;
+  height: 80px;
+  image-rendering: pixelated;
+  animation: enemyFloat 2s ease-in-out infinite;
+}
+
+@keyframes enemyFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Player side */
+.player-battle-area {
+  position: absolute;
+  bottom: 20px;
+  left: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.player-battle-sprite {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+}
+
+.player-card-battle {
+  background: rgba(255,255,255,0.95);
+  border: 2px solid #333;
+  border-radius: 4px;
+  padding: 8px 12px;
+  min-width: 180px;
+}
+
+/* Battle UI panel */
+.battle-ui {
+  height: 140px;
+  background: #f5f5dc;
+  border-top: 4px solid #333;
+  display: flex;
+}
+
+.battle-message {
+  flex: 1;
+  padding: 12px 16px;
+  border-right: 3px solid #333;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.battle-text {
+  font-size: 8px;
+  color: #222;
+  line-height: 2;
+  min-height: 32px;
+}
+
+.battle-actions {
+  width: 280px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.battle-btn {
+  background: #e8e0cc;
+  border: 2px solid #333;
+  color: #222;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.1s;
+  letter-spacing: 0.5px;
+}
+
+.battle-btn:hover {
+  background: #d4c9a8;
+}
+
+.battle-btn:active {
+  background: #c4b898;
+}
+
+.battle-btn.selected {
+  background: #b8a878;
+  border-color: #222;
+}
+
+/* cursor triangle */
+.battle-btn.selected::before {
+  content: '▶';
+  font-size: 8px;
+  color: #222;
+  margin-right: 2px;
+}
+
+/* ── Tile styles ── */
+.tile {
+  width: 64px;
+  height: 64px;
+  position: relative;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* ── Transition overlay ── */
+.map-transition {
+  position: absolute;
+  inset: 0;
+  background: black;
+  z-index: 100;
+  animation: fadeInOut 0.5s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
