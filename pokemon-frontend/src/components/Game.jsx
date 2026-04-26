@@ -287,23 +287,18 @@ export default function Game() {
     console.log(`[${x}, ${y}, ${clampedTileId}],`);
   }, [paintMode, current, selectedTileId, currentMap, fillStart]);
 
-  // NEW: Save all paint edits to localStorage permanently
+  // Save all paint edits to localStorage permanently
   const handleSaveToLocalStorage = useCallback(() => {
     try {
-      // Save the current paint log to localStorage
       localStorage.setItem(STORAGE_KEYS.PAINT_LOG, JSON.stringify(paintLog));
-      
-      // Also save current map and player position
       localStorage.setItem(STORAGE_KEYS.CURRENT_MAP, currentMap);
       localStorage.setItem(STORAGE_KEYS.PLAYER_POS, JSON.stringify(player));
       
-      // Count total edits
       const totalEdits = Object.values(paintLog).reduce((sum, arr) => sum + arr.length, 0);
       setExportStatus(`✅ Saved ${totalEdits} tile edits to browser storage! (Will persist after refresh)`);
       
-      // Optional: Show success message that disappears after 3 seconds
       setTimeout(() => {
-        if (exportStatus.includes("✅")) setExportStatus("");
+        setExportStatus(prev => prev.includes("✅") ? "" : prev);
       }, 3000);
     } catch (error) {
       console.error("Failed to save to localStorage:", error);
@@ -311,12 +306,11 @@ export default function Game() {
     }
   }, [paintLog, currentMap, player]);
 
-  // NEW: Load saved edits from localStorage (manual reload)
+  // Load saved edits from localStorage (manual reload)
   const handleLoadFromLocalStorage = useCallback(() => {
     try {
       const savedLog = loadSavedPaintLog();
       
-      // Apply overrides to the actual map data
       Object.keys(savedLog).forEach(mapName => {
         const overrides = savedLog[mapName];
         if (overrides && maps[mapName]) {
@@ -332,7 +326,7 @@ export default function Game() {
       setExportStatus(`📂 Loaded ${Object.values(savedLog).reduce((sum, arr) => sum + arr.length, 0)} saved edits!`);
       
       setTimeout(() => {
-        if (exportStatus.includes("📂")) setExportStatus("");
+        setExportStatus(prev => prev.includes("📂") ? "" : prev);
       }, 3000);
     } catch (error) {
       console.error("Failed to load from localStorage:", error);
@@ -340,27 +334,138 @@ export default function Game() {
     }
   }, []);
 
-  // NEW: Clear ALL saved data (reset everything)
+  // Clear ALL saved data (reset everything)
   const handleResetAllData = useCallback(() => {
     if (window.confirm("⚠️ WARNING: This will delete ALL saved map edits and reset player position! This cannot be undone. Continue?")) {
       try {
-        // Clear localStorage
         localStorage.removeItem(STORAGE_KEYS.PAINT_LOG);
         localStorage.removeItem(STORAGE_KEYS.CURRENT_MAP);
         localStorage.removeItem(STORAGE_KEYS.PLAYER_POS);
         
-        // Reset state
         setPaintLog({ map1: [], map2: [], map5: [], map6: [] });
         setCurrentMap("map1");
         setPlayer({ x: 2, y: 2 });
         
-        // Reload the page to reset maps to original
         window.location.reload();
       } catch (error) {
         console.error("Failed to reset:", error);
         setExportStatus("❌ Reset failed!");
       }
     }
+  }, []);
+
+  // NEW: Export map edits as a downloadable JSON file (for sharing via Git/PR)
+  const handleExportToFile = useCallback(() => {
+    const totalEdits = Object.values(paintLog).reduce((sum, arr) => sum + arr.length, 0);
+    
+    if (totalEdits === 0) {
+      setExportStatus("No edits to export. Paint some tiles first!");
+      return;
+    }
+    
+    const exportData = {
+      version: "1.0",
+      createdAt: new Date().toISOString(),
+      createdBy: "Allout-Legends Map Editor",
+      edits: paintLog,
+      metadata: {
+        currentMap: currentMap,
+        playerPos: player,
+        totalEdits: totalEdits
+      }
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `allout_map_${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    setExportStatus(`📁 Exported ${totalEdits} tile edits to JSON file! Share this file via Git/PR.`);
+    
+    setTimeout(() => {
+      setExportStatus(prev => prev.includes("📁") ? "" : prev);
+    }, 4000);
+  }, [paintLog, currentMap, player]);
+
+  // NEW: Import map edits from a JSON file (from friend's PR/export)
+  const handleImportFromFile = useCallback(() => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          
+          // Support both new format (with version) and legacy format
+          let importedEdits;
+          if (imported.version && imported.edits) {
+            // New format with metadata
+            importedEdits = imported.edits;
+            setExportStatus(`📂 Importing map from ${new Date(imported.createdAt).toLocaleString()}`);
+          } else if (imported.map1 || imported.map2 || imported.map5 || imported.map6) {
+            // Legacy format (direct paintLog object)
+            importedEdits = imported;
+            setExportStatus(`📂 Importing legacy map file...`);
+          } else {
+            setExportStatus("❌ Invalid map file format");
+            return;
+          }
+          
+          // Apply imported edits to maps
+          Object.keys(importedEdits).forEach(mapName => {
+            const overrides = importedEdits[mapName];
+            if (overrides && maps[mapName]) {
+              overrides.forEach(({ x, y, id }) => {
+                if (maps[mapName][y] && maps[mapName][y][x] !== undefined) {
+                  maps[mapName][y][x] = id;
+                }
+              });
+            }
+          });
+          
+          setPaintLog(importedEdits);
+          
+          // Optionally restore player position if in metadata
+          if (imported.metadata?.currentMap) {
+            if (confirm("Also restore saved player position from this map file?")) {
+              setCurrentMap(imported.metadata.currentMap);
+              if (imported.metadata.playerPos) {
+                setPlayer(imported.metadata.playerPos);
+              }
+            }
+          }
+          
+          // Save to localStorage automatically
+          localStorage.setItem(STORAGE_KEYS.PAINT_LOG, JSON.stringify(importedEdits));
+          
+          const totalEdits = Object.values(importedEdits).reduce((sum, arr) => sum + arr.length, 0);
+          setExportStatus(`✅ Imported ${totalEdits} tile edits from ${file.name}! Click 💾 SAVE to make permanent.`);
+          
+          setTimeout(() => {
+            setExportStatus(prev => prev.includes("✅") ? "" : prev);
+          }, 4000);
+        } catch (error) {
+          console.error("Import failed:", error);
+          setExportStatus("❌ Failed to import file. Make sure it's a valid map JSON.");
+        }
+      };
+      reader.readAsText(file);
+    };
+    
+    input.click();
   }, []);
 
   const handleExportOverrides = useCallback(async () => {
@@ -402,7 +507,6 @@ export default function Game() {
         return;
       }
 
-      // NEW: Ctrl+S shortcut to save
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
         handleSaveToLocalStorage();
@@ -496,7 +600,6 @@ export default function Game() {
     tileType === 33 ? "Mushrooms" :
     "Grass";
 
-  // Calculate total saved edits for display
   const totalSavedEdits = Object.values(paintLog).reduce((sum, arr) => sum + arr.length, 0);
 
   return (
@@ -612,7 +715,7 @@ export default function Game() {
                   />
                 </div>
 
-                {/* NEW: Save/Load/Reset Buttons */}
+                {/* Save/Load/Reset Buttons */}
                 <div className="paint-row">
                   <button
                     type="button"
@@ -639,15 +742,36 @@ export default function Game() {
                   </button>
                 </div>
 
+                {/* NEW: Git/PR Friendly Import/Export Buttons */}
+                <div className="paint-row">
+                  <button
+                    type="button"
+                    className="paint-action-btn"
+                    onClick={handleExportToFile}
+                    style={{ background: "#2196f3", color: "white" }}
+                  >
+                    📁 Export File
+                  </button>
+                  <button
+                    type="button"
+                    className="paint-action-btn"
+                    onClick={handleImportFromFile}
+                    style={{ background: "#ff9800", color: "white" }}
+                  >
+                    📂 Import File
+                  </button>
+                </div>
+
                 <div className="paint-hint">Press P to toggle, [ / ] to change ID, click map to paint.</div>
                 <div className="paint-hint">Shift+click = rectangle fill. Right-click = erase to id 0.</div>
                 <div className="paint-hint">💾 Click SAVE to persist edits (Ctrl+S shortcut)</div>
+                <div className="paint-hint">📁 Export File = share map via Git/PR | 📂 Import File = load from PR</div>
                 {fillStart && <div className="paint-hint">Fill start: ({fillStart.x}, {fillStart.y})</div>}
                 <div className="paint-actions">
                   <button type="button" className="paint-action-btn" onClick={handleExportOverrides}>Export Code</button>
                   <button type="button" className="paint-action-btn" onClick={clearPaintLogForCurrentMap}>Clear Log</button>
                 </div>
-                {exportStatus && <div className="paint-hint" style={{ color: exportStatus.includes("✅") ? "#43a047" : exportStatus.includes("❌") ? "#d32f2f" : "#ffa000" }}>{exportStatus}</div>}
+                {exportStatus && <div className="paint-hint" style={{ color: exportStatus.includes("✅") ? "#43a047" : exportStatus.includes("❌") ? "#d32f2f" : exportStatus.includes("📁") ? "#2196f3" : "#ffa000" }}>{exportStatus}</div>}
                 <pre className="paint-output">{currentPaintLines || "// no edits yet"}</pre>
               </div>
             </aside>
