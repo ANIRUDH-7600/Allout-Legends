@@ -1,6 +1,7 @@
 // pokemon-frontend/src/components/MapEditor.jsx
 import { useState } from "react";
 import { clampTileId, TILESET_MAX_ID } from "../data/tilesetMeta";
+import { getTileStyle } from "../data/masterTileset";
 import TileViewer from "./TileViewer";
 
 export default function MapEditor({
@@ -24,7 +25,12 @@ export default function MapEditor({
   terrainName,
   totalSavedEdits,
   pressedKey,
-  handleDpad
+  handleDpad,
+  // per-position scale props
+  pendingScale,
+  setPendingScale,
+  tileScales,
+  hoveredTile,
 }) {
   const [showTileViewer, setShowTileViewer] = useState(false);
 
@@ -32,6 +38,15 @@ export default function MapEditor({
     setSelectedTileId(tileId);
     setShowTileViewer(false);
   };
+
+  const previewStyle = getTileStyle(selectedTileId, 48);
+
+  // What position are we showing scale for?
+  // If hovering a tile in paint mode, show that tile's current scale.
+  // Otherwise show pendingScale (what the next painted tile will use).
+  const displayScale = pendingScale;
+  const hoveredKey = hoveredTile ? `${hoveredTile.x},${hoveredTile.y}` : null;
+  const hoveredCurrentScale = hoveredKey ? (tileScales[hoveredKey] ?? 1) : null;
 
   return (
     <aside className="deluge-panel">
@@ -63,29 +78,13 @@ export default function MapEditor({
 
       <div className="controls-pad">
         <div className="pad-grid">
-          <button
-            className={`pad-btn up ${pressedKey === "ArrowUp" ? "pressed" : ""}`}
-            onClick={() => handleDpad("up")}
-            aria-label="Move up"
-          ></button>
-          <button
-            className={`pad-btn left ${pressedKey === "ArrowLeft" ? "pressed" : ""}`}
-            onClick={() => handleDpad("left")}
-            aria-label="Move left"
-          ></button>
+          <button className={`pad-btn up ${pressedKey === "ArrowUp" ? "pressed" : ""}`} onClick={() => handleDpad("up")} aria-label="Move up" />
+          <button className={`pad-btn left ${pressedKey === "ArrowLeft" ? "pressed" : ""}`} onClick={() => handleDpad("left")} aria-label="Move left" />
           <div className="pad-center">
             <img src="/assets/heros/Alpha_Coder.png" alt="Player icon" />
           </div>
-          <button
-            className={`pad-btn right ${pressedKey === "ArrowRight" ? "pressed" : ""}`}
-            onClick={() => handleDpad("right")}
-            aria-label="Move right"
-          ></button>
-          <button
-            className={`pad-btn down ${pressedKey === "ArrowDown" ? "pressed" : ""}`}
-            onClick={() => handleDpad("down")}
-            aria-label="Move down"
-          ></button>
+          <button className={`pad-btn right ${pressedKey === "ArrowRight" ? "pressed" : ""}`} onClick={() => handleDpad("right")} aria-label="Move right" />
+          <button className={`pad-btn down ${pressedKey === "ArrowDown" ? "pressed" : ""}`} onClick={() => handleDpad("down")} aria-label="Move down" />
         </div>
       </div>
 
@@ -95,17 +94,15 @@ export default function MapEditor({
       </label>
 
       <div className="paint-tools">
+        {/* Paint toggle */}
         <div className="paint-row">
           <span className="meta-label">Paint</span>
-          <button
-            type="button"
-            className={`paint-toggle ${paintMode ? "on" : ""}`}
-            onClick={() => setPaintMode((prev) => !prev)}
-          >
+          <button type="button" className={`paint-toggle ${paintMode ? "on" : ""}`} onClick={() => setPaintMode(p => !p)}>
             {paintMode ? "ON" : "OFF"}
           </button>
         </div>
 
+        {/* Tile ID */}
         <div className="paint-row">
           <span className="meta-label">Tile ID</span>
           <input
@@ -116,102 +113,141 @@ export default function MapEditor({
             value={selectedTileId}
             onChange={(e) => {
               const next = Number(e.target.value);
-              if (Number.isFinite(next)) {
-                setSelectedTileId(clampTileId(next));
-              }
+              if (Number.isFinite(next)) setSelectedTileId(clampTileId(next));
             }}
           />
         </div>
 
-        {/* Browse Tiles Button */}
-        <div className="paint-row">
-          <button
-            type="button"
-            className="paint-action-btn"
-            onClick={() => setShowTileViewer(true)}
-            style={{ background: "#9c27b0", color: "white", width: "100%" }}
-          >
+        {/* ── Sprite Scale (per tile position) ── */}
+        <div style={{ marginTop: "6px", borderTop: "1px solid #b0b4bf", paddingTop: "6px" }}>
+          <div className="paint-row" style={{ marginBottom: "4px" }}>
+            <span className="meta-label" style={{ fontSize: "7px" }}>
+              🔍 Sprite Scale (per tile)
+            </span>
+            <button
+              type="button"
+              className="paint-action-btn"
+              style={{ minWidth: "36px", height: "18px", fontSize: "7px" }}
+              onClick={() => setPendingScale(1)}
+            >
+              Reset
+            </button>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <input
+              type="range"
+              min={0.1}
+              max={1}
+              step={0.05}
+              value={displayScale}
+              onChange={(e) => setPendingScale(parseFloat(e.target.value))}
+              style={{ flex: 1, cursor: "pointer", accentColor: "#8dd06f" }}
+            />
+            <span style={{ fontSize: "8px", minWidth: "30px", textAlign: "right", color: "#17181b" }}>
+              {Math.round(displayScale * 100)}%
+            </span>
+          </div>
+
+          {/* Live preview of selected tile at pending scale */}
+          <div style={{ marginTop: "6px", display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{
+              width: "48px", height: "48px",
+              background: "#b6f09e",
+              border: "2px solid #3a3a3f",
+              borderRadius: "4px",
+              position: "relative",
+              overflow: "hidden",
+              flexShrink: 0,
+            }}>
+              {previewStyle && Object.keys(previewStyle).length > 0 && (
+                <div style={{
+                  ...previewStyle,
+                  position: "absolute",
+                  top: "50%", left: "50%",
+                  transform: `translate(-50%, -50%) scale(${displayScale})`,
+                  transformOrigin: "center center",
+                }} />
+              )}
+            </div>
+            <div style={{ fontSize: "7px", color: "#383a3f", lineHeight: 1.7 }}>
+              {paintMode ? (
+                <>
+                  <div style={{ color: "#1565c0", fontWeight: "bold" }}>Paint mode ON</div>
+                  <div>Each tile you click</div>
+                  <div>gets this scale.</div>
+                  {hoveredTile && (
+                    <div style={{ color: "#9c27b0", marginTop: "2px" }}>
+                      Hover ({hoveredTile.x},{hoveredTile.y}): {Math.round((hoveredCurrentScale ?? 1) * 100)}%
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div>Enable Paint to</div>
+                  <div>apply this scale.</div>
+                </>
+              )}
+              <div style={{ color: displayScale < 1 ? "#e67e22" : "#43a047", marginTop: "2px" }}>
+                {displayScale < 1 ? `↓ ${Math.round((1 - displayScale) * 100)}% smaller` : "Full size"}
+              </div>
+            </div>
+          </div>
+
+          <div className="paint-hint" style={{ marginTop: "4px" }}>
+            Scale is per-tile. Each painted spot keeps its own size.
+          </div>
+        </div>
+
+        {/* Browse Tiles */}
+        <div className="paint-row" style={{ marginTop: "6px" }}>
+          <button type="button" className="paint-action-btn" onClick={() => setShowTileViewer(true)}
+            style={{ background: "#9c27b0", color: "white", width: "100%" }}>
             🖼️ Browse Tiles
           </button>
         </div>
 
-        {/* Save/Load/Reset Buttons */}
+        {/* Save / Load / Reset */}
         <div className="paint-row">
-          <button
-            type="button"
-            className="paint-action-btn"
-            onClick={handleSaveToLocalStorage}
-            style={{ background: "#43a047", color: "white", fontWeight: "bold" }}
-          >
-            💾 SAVE
-          </button>
-          <button
-            type="button"
-            className="paint-action-btn"
-            onClick={handleLoadFromLocalStorage}
-          >
-            📂 LOAD
-          </button>
-          <button
-            type="button"
-            className="paint-action-btn"
-            onClick={handleResetAllData}
-            style={{ background: "#d32f2f", color: "white" }}
-          >
-            🗑 RESET
-          </button>
+          <button type="button" className="paint-action-btn" onClick={handleSaveToLocalStorage}
+            style={{ background: "#43a047", color: "white", fontWeight: "bold" }}>💾 SAVE</button>
+          <button type="button" className="paint-action-btn" onClick={handleLoadFromLocalStorage}>📂 LOAD</button>
+          <button type="button" className="paint-action-btn" onClick={handleResetAllData}
+            style={{ background: "#d32f2f", color: "white" }}>🗑 RESET</button>
         </div>
 
-        {/* Git/PR Friendly Import/Export Buttons */}
+        {/* Export / Import */}
         <div className="paint-row">
-          <button
-            type="button"
-            className="paint-action-btn"
-            onClick={handleExportToFile}
-            style={{ background: "#2196f3", color: "white" }}
-          >
-            📁 Export File
-          </button>
-          <button
-            type="button"
-            className="paint-action-btn"
-            onClick={handleImportFromFile}
-            style={{ background: "#ff9800", color: "white" }}
-          >
-            📂 Import File
-          </button>
+          <button type="button" className="paint-action-btn" onClick={handleExportToFile}
+            style={{ background: "#2196f3", color: "white" }}>📁 Export File</button>
+          <button type="button" className="paint-action-btn" onClick={handleImportFromFile}
+            style={{ background: "#ff9800", color: "white" }}>📂 Import File</button>
         </div>
 
         <div className="paint-hint">Press P to toggle, [ / ] to change ID, click map to paint.</div>
         <div className="paint-hint">Shift+click = rectangle fill. Right-click = erase to id 0.</div>
         <div className="paint-hint">💾 Click SAVE to persist edits (Ctrl+S shortcut)</div>
-        <div className="paint-hint">📁 Export File = share map via Git/PR | 📂 Import File = load from PR</div>
         <div className="paint-hint">🖼️ Browse Tiles = see all tiles with IDs</div>
         {fillStart && <div className="paint-hint">Fill start: ({fillStart.x}, {fillStart.y})</div>}
-        
+
         <div className="paint-actions">
           <button type="button" className="paint-action-btn" onClick={handleExportOverrides}>Export Code</button>
           <button type="button" className="paint-action-btn" onClick={clearPaintLogForCurrentMap}>Clear Log</button>
         </div>
-        
+
         {exportStatus && (
-          <div className="paint-hint" style={{ 
-            color: exportStatus.includes("✅") ? "#43a047" : 
-                   exportStatus.includes("❌") ? "#d32f2f" : 
-                   exportStatus.includes("📁") ? "#2196f3" : "#ffa000" 
-          }}>
-            {exportStatus}
-          </div>
+          <div className="paint-hint" style={{
+            color: exportStatus.includes("✅") ? "#43a047" :
+                   exportStatus.includes("❌") ? "#d32f2f" :
+                   exportStatus.includes("📁") ? "#2196f3" : "#ffa000"
+          }}>{exportStatus}</div>
         )}
-        
+
         <pre className="paint-output">{currentPaintLines || "// no edits yet"}</pre>
       </div>
 
       {showTileViewer && (
-        <TileViewer 
-          onClose={() => setShowTileViewer(false)}
-          onSelectTile={handleTileSelect}
-        />
+        <TileViewer onClose={() => setShowTileViewer(false)} onSelectTile={handleTileSelect} />
       )}
     </aside>
   );

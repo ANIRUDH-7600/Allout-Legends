@@ -1,8 +1,10 @@
+// pokemon-frontend/src/components/Map.jsx
 import Tile from "./Tile";
 
 const TILE_SIZE = 64;
 
-export default function Map({ map, camera, playerPos, paintMode = false, onTileClick }) {
+// tileScales shape: { "x,y": scale }  — per position for the current map
+export default function Map({ map, camera, playerPos, paintMode = false, onTileClick, tileScales = {}, onTileHover }) {
   const playerScreenX = playerPos.x * TILE_SIZE - camera.x + TILE_SIZE / 2;
   const playerScreenY = playerPos.y * TILE_SIZE - camera.y + TILE_SIZE / 2;
 
@@ -22,6 +24,7 @@ export default function Map({ map, camera, playerPos, paintMode = false, onTileC
             <Tile
               key={`${x}-${y}`}
               type={cell}
+              tileScale={tileScales[`${x},${y}`]}
               onClick={paintMode ? (event) => {
                 event.preventDefault();
                 onTileClick?.(x, y, { action: "paint", shiftKey: event.shiftKey });
@@ -30,6 +33,8 @@ export default function Map({ map, camera, playerPos, paintMode = false, onTileC
                 event.preventDefault();
                 onTileClick?.(x, y, { action: "erase", shiftKey: false });
               } : undefined}
+              onMouseEnter={onTileHover ? () => onTileHover({ x, y }) : undefined}
+              onMouseLeave={onTileHover ? () => onTileHover(null) : undefined}
               title={`x:${x} y:${y} id:${cell}`}
             />
           ))

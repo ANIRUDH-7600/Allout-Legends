@@ -23,6 +23,7 @@ const STORAGE_KEYS = {
   PAINT_LOG: "allout_legends_paint_log",
   CURRENT_MAP: "allout_legends_current_map",
   PLAYER_POS: "allout_legends_player_pos",
+  TILE_SCALES: "allout_legends_tile_scales",
 };
 
 function isAtSideGate(y) {
@@ -107,7 +108,39 @@ export default function Game() {
     applySavedOverridesToMaps(savedLog);
     return savedLog;
   });
-  
+
+  // tileScales: { [mapName]: { "x,y": scale } } — per map, per position
+  const [tileScales, setTileScalesState] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.TILE_SCALES);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // The scale value that will be stamped onto the next painted tile
+  const [pendingScale, setPendingScale] = useState(1);
+
+  // Which tile is currently hovered in paint mode (for UI feedback)
+  const [hoveredTile, setHoveredTile] = useState(null);
+
+  // Set scale for a specific map position
+  const setPositionScale = useCallback((mapName, x, y, scale) => {
+    setTileScalesState((prev) => {
+      const mapScales = { ...(prev[mapName] || {}) };
+      const key = `${x},${y}`;
+      if (scale >= 1) {
+        delete mapScales[key];
+      } else {
+        mapScales[key] = scale;
+      }
+      const next = { ...prev, [mapName]: mapScales };
+      localStorage.setItem(STORAGE_KEYS.TILE_SCALES, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const current = maps[currentMap];
   const mapNames = { map1: "Realm 1", map2: "Realm 2", map5: "Realm 5", map6: "Realm 6" };
 
@@ -266,6 +299,8 @@ export default function Game() {
       const eraseId = 0;
       maps[currentMap][y][x] = eraseId;
       upsertEntries([{ x, y, id: eraseId }]);
+      // Reset scale for erased tile position
+      setPositionScale(currentMap, x, y, 1);
       setFillStart(null);
       return;
     }
@@ -290,6 +325,7 @@ export default function Game() {
           if (maps[currentMap][yy] && maps[currentMap][yy][xx] !== undefined) {
             maps[currentMap][yy][xx] = clampedTileId;
             entries.push({ x: xx, y: yy, id: clampedTileId });
+            setPositionScale(currentMap, xx, yy, pendingScale);
           }
         }
       }
@@ -302,8 +338,10 @@ export default function Game() {
 
     maps[currentMap][y][x] = clampedTileId;
     upsertEntries([{ x, y, id: clampedTileId }]);
+    // Stamp the current pending scale onto this specific position
+    setPositionScale(currentMap, x, y, pendingScale);
     setFillStart(null);
-  }, [paintMode, current, selectedTileId, currentMap, fillStart]);
+  }, [paintMode, current, selectedTileId, currentMap, fillStart, pendingScale, setPositionScale]);
 
   // ============ STORAGE HANDLERS ============
   const handleSaveToLocalStorage = useCallback(() => {
@@ -311,6 +349,7 @@ export default function Game() {
       localStorage.setItem(STORAGE_KEYS.PAINT_LOG, JSON.stringify(paintLog));
       localStorage.setItem(STORAGE_KEYS.CURRENT_MAP, currentMap);
       localStorage.setItem(STORAGE_KEYS.PLAYER_POS, JSON.stringify(player));
+      localStorage.setItem(STORAGE_KEYS.TILE_SCALES, JSON.stringify(tileScales));
       
       const totalEdits = Object.values(paintLog).reduce((sum, arr) => sum + arr.length, 0);
       setExportStatus(`✅ Saved ${totalEdits} tile edits to browser storage!`);
@@ -323,7 +362,7 @@ export default function Game() {
       console.error("Save failed:", err);
       setExportStatus("❌ Save failed!");
     }
-  }, [paintLog, currentMap, player]);
+  }, [paintLog, currentMap, player, tileScales]);
 
   const handleLoadFromLocalStorage = useCallback(() => {
     try {
@@ -583,6 +622,8 @@ export default function Game() {
                   playerPos={player}
                   paintMode={paintMode}
                   onTileClick={handleTilePaint}
+                  tileScales={tileScales[currentMap] || {}}
+                  onTileHover={paintMode ? setHoveredTile : null}
                 />
                 {transition && <div className="map-transition" />}
               </div>
@@ -610,6 +651,10 @@ export default function Game() {
               totalSavedEdits={totalSavedEdits}
               pressedKey={pressedKey}
               handleDpad={handleDpad}
+              pendingScale={pendingScale}
+              setPendingScale={setPendingScale}
+              tileScales={tileScales[currentMap] || {}}
+              hoveredTile={hoveredTile}
             />
           </>
         )}
