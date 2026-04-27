@@ -3,14 +3,16 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Map from "./Map";
 import Battle from "./Battle";
 import MapEditor from "./MapEditor";
+import Sidebar from "./Sidebar";
 import { maps } from "../data/maps";
 import { clampTileId, TILESET_MAX_ID } from "../data/tilesetMeta";
 import { movePlayer } from "../logic/movement";
 import { checkEncounter } from "../logic/encounter";
 
 const TILE = 64;
-const VIEWPORT_W = 640;
-const VIEWPORT_H = 480;
+const VIEWPORT_W = 900;
+// Height is dynamic (100vh - 68px), use a generous default for camera calc
+const VIEWPORT_H = typeof window !== 'undefined' ? window.innerHeight - 68 : 700;
 const SIDE_GATE_Y_MIN = 14;
 const SIDE_GATE_Y_MAX = 15;
 const VERTICAL_GATE_X_MIN = 14;
@@ -67,6 +69,7 @@ export default function Game() {
       try {
         return JSON.parse(saved);
       } catch (e) {
+        console.error("Failed to parse player position:", e);
         return { x: 2, y: 2 };
       }
     }
@@ -92,6 +95,12 @@ export default function Game() {
   const [exportStatus, setExportStatus] = useState("");
   const [encounterArea, setEncounterArea] = useState("grass");
   
+  // Sidebar state
+  const [activeSection, setActiveSection] = useState("profile");
+  const [party, setParty] = useState([
+    { id: "PIKACHU", name: "Pikachu", level: 10, hp: 50, maxHp: 50 }
+  ]);
+  
   // Load saved paint log on startup
   const [paintLog, setPaintLog] = useState(() => {
     const savedLog = loadSavedPaintLog();
@@ -101,6 +110,13 @@ export default function Game() {
   
   const current = maps[currentMap];
   const mapNames = { map1: "Realm 1", map2: "Realm 2", map5: "Realm 5", map6: "Realm 6" };
+
+  // Sidebar handler
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
+    // Add section-specific logic here later
+    console.log(`Switched to: ${section}`);
+  };
 
   // ============ EFFECTS ============
   // Save player position whenever it changes
@@ -299,8 +315,12 @@ export default function Game() {
       const totalEdits = Object.values(paintLog).reduce((sum, arr) => sum + arr.length, 0);
       setExportStatus(`✅ Saved ${totalEdits} tile edits to browser storage!`);
       
-      setTimeout(() => setExportStatus(prev => prev.includes("✅") ? "" : prev), 3000);
-    } catch (error) {
+      const timeoutId = setTimeout(() => {
+        setExportStatus(prev => prev.includes("✅") ? "" : prev);
+      }, 3000);
+      return () => clearTimeout(timeoutId);
+    } catch (err) {
+      console.error("Save failed:", err);
       setExportStatus("❌ Save failed!");
     }
   }, [paintLog, currentMap, player]);
@@ -321,9 +341,15 @@ export default function Game() {
       });
       
       setPaintLog(savedLog);
-      setExportStatus(`📂 Loaded ${Object.values(savedLog).reduce((sum, arr) => sum + arr.length, 0)} saved edits!`);
-      setTimeout(() => setExportStatus(prev => prev.includes("📂") ? "" : prev), 3000);
-    } catch (error) {
+      const totalEdits = Object.values(savedLog).reduce((sum, arr) => sum + arr.length, 0);
+      setExportStatus(`📂 Loaded ${totalEdits} saved edits!`);
+      
+      const timeoutId = setTimeout(() => {
+        setExportStatus(prev => prev.includes("📂") ? "" : prev);
+      }, 3000);
+      return () => clearTimeout(timeoutId);
+    } catch (err) {
+      console.error("Load failed:", err);
       setExportStatus("❌ Load failed!");
     }
   }, []);
@@ -365,7 +391,10 @@ export default function Game() {
     URL.revokeObjectURL(url);
     
     setExportStatus(`📁 Exported ${totalEdits} tile edits!`);
-    setTimeout(() => setExportStatus(prev => prev.includes("📁") ? "" : prev), 4000);
+    const timeoutId = setTimeout(() => {
+      setExportStatus(prev => prev.includes("📁") ? "" : prev);
+    }, 4000);
+    return () => clearTimeout(timeoutId);
   }, [paintLog, currentMap, player]);
 
   const handleImportFromFile = useCallback(() => {
@@ -408,8 +437,12 @@ export default function Game() {
           
           const totalEdits = Object.values(importedEdits).reduce((sum, arr) => sum + arr.length, 0);
           setExportStatus(`✅ Imported ${totalEdits} tile edits!`);
-          setTimeout(() => setExportStatus(prev => prev.includes("✅") ? "" : prev), 4000);
-        } catch (error) {
+          
+          setTimeout(() => {
+            setExportStatus(prev => prev.includes("✅") ? "" : prev);
+          }, 4000);
+        } catch (err) {
+          console.error("Import failed:", err);
           setExportStatus("❌ Failed to import file.");
         }
       };
@@ -433,7 +466,8 @@ export default function Game() {
     try {
       await navigator.clipboard.writeText(block);
       setExportStatus("Copied override block to clipboard.");
-    } catch {
+    } catch (err) {
+      console.error("Clipboard failed:", err);
       console.log(block);
       setExportStatus("Clipboard blocked. Block printed to console.");
     }
@@ -487,7 +521,7 @@ export default function Game() {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, [handleMove, paintMode, handleSaveToLocalStorage]);
+  }, [handleMove, paintMode, handleSaveToLocalStorage, setSelectedTileId]);
 
   // ============ DPAD ============
   const handleDpad = (dir) => {
@@ -508,7 +542,7 @@ export default function Game() {
   const terrainName = getTerrainName(tileType);
   const totalSavedEdits = Object.values(paintLog).reduce((sum, arr) => sum + arr.length, 0);
 
-  function getTerrainName(tileType) {
+  function getTerrainName(tileTypeNum) {
     const terrainMap = {
       2: "Tall Grass", 1: "Rock Wall", 0: "Route Path", 4: "Flowers",
       5: "Boulder", 6: "Tree", 7: "Pine Tree", 8: "Tree", 9: "Big Bush",
@@ -518,12 +552,18 @@ export default function Game() {
       24: "Soil", 25: "Cave", 26: "Narrow Cave", 27: "Giant Rock", 28: "Light Path",
       29: "Pine", 30: "Stump", 31: "Reeds", 32: "Wheat", 33: "Mushrooms"
     };
-    return terrainMap[tileType] || "Grass";
+    return terrainMap[tileTypeNum] || "Grass";
   }
 
   // ============ RENDER ============
   return (
     <div className="game-container">
+      <Sidebar 
+        player={{ x: player.x, y: player.y, mapId: currentMap }}
+        party={party}
+        onSectionChange={handleSectionChange}
+        activeSection={activeSection}
+      />
       <div className="layout">
         {gameState === "map" && (
           <>

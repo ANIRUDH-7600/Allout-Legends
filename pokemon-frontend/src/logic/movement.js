@@ -13,9 +13,9 @@ export function movePlayer(player, key, map) {
   // Check bounds
   if (newY < 0 || newY >= map.length) return player;
   if (newX < 0 || newX >= map[0].length) return player;
-  
+
   const tileId = map[newY][newX];
-  
+
   // Use dynamic walkability from master tileset
   if (isWalkable(tileId)) {
     return { x: newX, y: newY };

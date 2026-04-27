@@ -45,7 +45,7 @@ export default function Map({ map, camera, playerPos, paintMode = false, onTileC
       >
         <img
           className="player-avatar"
-          src="/assets/heros/Alpha%20Coder.png"
+          src="/assets/heros/Alpha_Coder.png"
           alt="Player avatar"
         />
       </div>

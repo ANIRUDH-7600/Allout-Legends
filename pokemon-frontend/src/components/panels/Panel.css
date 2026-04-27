@@ -1,0 +1,387 @@
+/* ProfilePanel.css - Premium Dark Retro Game Style */
+
+:root {
+  --bg-panel: #161616;
+  --bg-element: #0f0f0f;
+  --border-color: #333333;
+  --border-active: #4caf50;
+  --text-main: #ececec;
+  --text-muted: #888888;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-retro: 'Courier New', Courier, monospace;
+}
+
+/* ========== PROFILE PANEL ========== */
+.profile-panel {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 4px; /* Sharp, industrial feel */
+  padding: 24px;
+  color: var(--text-main);
+  min-width: 320px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.profile-header {
+  display: flex;
+  gap: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 24px;
+}
+
+.profile-avatar-large {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.profile-avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 'Squarcle' shape - modern premium feel, not perfectly round */
+  border-radius: 24px; 
+  border: 2px solid var(--border-color);
+  background: var(--bg-element);
+  image-rendering: pixelated; /* Keeps pixel art crisp */
+  transition: border-color 0.2s ease;
+}
+
+.profile-avatar-large:hover img {
+  border-color: var(--text-main);
+}
+
+.avatar-change-btn {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--bg-element);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 4px;
+  padding: 6px 16px;
+  font-size: 0.75rem;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.avatar-change-btn:hover {
+  background-color: var(--border-active);
+  color: #000;
+  border-color: var(--border-active);
+}
+
+.profile-info-large {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.profile-info-large h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  color: var(--text-main);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-family: var(--font-retro); /* Retro data font */
+  margin-bottom: 16px;
+}
+
+.stat-item span {
+  color: var(--text-main);
+  font-weight: bold;
+}
+
+.profile-progress {
+  margin-top: auto;
+}
+
+.xp-bar {
+  height: 6px;
+  background: var(--bg-element);
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid #222;
+}
+
+.xp-fill {
+  height: 100%;
+  background-color: var(--border-active);
+  /* No gradient, solid color is more premium/retro */
+  transition: width 0.3s ease-out;
+}
+
+.xp-text {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-retro);
+}
+
+/* Dropdown Menu - Redesigned as Action List */
+.profile-dropdown-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background-color: var(--bg-element);
+  border: 1px solid transparent; /* Invisible border to prevent layout shift */
+  border-radius: 4px;
+  color: var(--text-main);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.profile-dropdown-item:hover {
+  border-color: #555;
+  background-color: #1a1a1a;
+  transform: translateX(4px); /* Subtle movement */
+}
+
+.dropdown-icon {
+  font-size: 1.2rem;
+  width: 24px;
+  text-align: center;
+  opacity: 0.8;
+}
+
+.dropdown-label {
+  flex: 1;
+}
+
+.dropdown-badge {
+  background-color: #333;
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 2px;
+  font-family: var(--font-retro);
+  min-width: 30px;
+  text-align: center;
+}
+
+/* Avatar Modal */
+.avatar-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.avatar-modal {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  max-width: 800px;
+  width: 90%;
+  max-height: 85vh;
+  overflow: hidden; /* Inner scroll */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.1); /* Subtle outer glow */
+}
+
+.avatar-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-element);
+}
+
+.avatar-modal-header h3 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.close-modal {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px 12px;
+  line-height: 1;
+  transition: color 0.2s;
+  font-family: var(--font-retro);
+}
+
+.close-modal:hover {
+  color: #f44336;
+}
+
+.avatar-grid-scroll {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+}
+
+.avatar-option {
+  position: relative;
+  text-align: center;
+  padding: 16px;
+  background-color: var(--bg-element);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar-option:hover {
+  border-color: #666;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.avatar-option.selected {
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 1px var(--border-active), 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.avatar-option img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 16px; /* Match main avatar shape */
+  margin-bottom: 12px;
+  image-rendering: pixelated;
+}
+
+.avatar-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.avatar-rarity {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.avatar-rarity.common {
+  background-color: #333;
+  color: #999;
+  border: 1px solid #444;
+}
+
+.avatar-rarity.rare {
+  background-color: rgba(33, 150, 243, 0.2);
+  color: #2196f3;
+  border: 1px solid #2196f3;
+}
+
+.avatar-rarity.epic {
+  background-color: rgba(156, 39, 176, 0.2);
+  color: #9c27b0;
+  border: 1px solid #9c27b0;
+}
+
+.avatar-rarity.legendary {
+  background-color: rgba(255, 152, 0, 0.2);
+  color: #ff9800;
+  border: 1px solid #ff9800;
+}
+
+.avatar-modal-footer {
+  text-align: center;
+  padding: 16px;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-element);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--font-retro);
+}
+
+/* Avatar description */
+.avatar-description {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  padding: 0 4px;
+  line-height: 1.4;
+}
+
+/* Responsive for Profile Panel */
+@media (max-width: 768px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .profile-stats {
+    justify-content: center;
+    gap: 12px;
+  }
+  
+  .profile-progress {
+    width: 100%;
+  }
+  
+  .avatar-grid-scroll {
+    padding: 16px;
+  }
+  
+  .avatar-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 12px;
+  }
+  
+  .avatar-option img {
+    width: 60px;
+    height: 60px;
+  }
+}

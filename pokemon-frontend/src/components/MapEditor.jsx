@@ -74,7 +74,7 @@ export default function MapEditor({
             aria-label="Move left"
           ></button>
           <div className="pad-center">
-            <img src="/assets/heros/Alpha%20Coder.png" alt="Player icon" />
+            <img src="/assets/heros/Alpha_Coder.png" alt="Player icon" />
           </div>
           <button
             className={`pad-btn right ${pressedKey === "ArrowRight" ? "pressed" : ""}`}

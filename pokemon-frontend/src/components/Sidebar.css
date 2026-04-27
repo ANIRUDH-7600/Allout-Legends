@@ -1,0 +1,312 @@
+/* ========== LEFT SIDEBAR — ICON RAIL ========== */
+/* Floats over content, never pushes layout */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.game-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 56px;
+  background: #0d0d14;
+  border-right: 2px solid #1e1e2e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 200;
+  padding: 8px 0;
+  gap: 0;
+}
+
+/* No collapsed state needed — it's always icon-only */
+.game-sidebar.collapsed {
+  width: 56px;
+}
+
+/* Hide old toggle — sidebar is always compact now */
+.sidebar-toggle {
+  display: none;
+}
+
+/* ---- Nav items ---- */
+.sidebar-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  padding-top: 8px;
+}
+
+.sidebar-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #4a4a6a;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  /* Reset font so icons render cleanly */
+  font-family: inherit;
+  font-size: 18px;
+}
+
+.sidebar-item:hover {
+  background: #1a1a2e;
+  color: #c0c0e0;
+}
+
+.sidebar-item.active {
+  background: #1a1a2e;
+  color: #4caf50;
+  box-shadow: inset 3px 0 0 #4caf50;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Left accent bar for active */
+.sidebar-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: currentColor;
+  border-radius: 0 2px 2px 0;
+}
+
+.sidebar-icon {
+  font-size: 18px;
+  line-height: 1;
+  display: block;
+}
+
+/* Hide text labels — icon-only */
+.sidebar-label {
+  display: none;
+}
+
+/* Tooltip on hover */
+.sidebar-item::after {
+  content: attr(title);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #0d0d14;
+  border: 1px solid #2a2a3e;
+  color: #c0c0e0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 300;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sidebar-item:hover::after {
+  opacity: 1;
+}
+
+/* Badge */
+.sidebar-badge,
+.sidebar-badge-collapsed {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #f44336;
+  color: #fff;
+  font-size: 7px;
+  font-family: 'Press Start 2P', monospace;
+  padding: 2px 4px;
+  border-radius: 4px;
+  min-width: 14px;
+  text-align: center;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ---- Footer / Avatar ---- */
+.sidebar-footer {
+  padding: 8px 0 4px;
+  border-top: 1px solid #1e1e2e;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.sidebar-player {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-avatar-mini {
+  width: 36px;
+  height: 36px;
+  background: #1a1a2e;
+  border-radius: 8px;
+  border: 2px solid #2a2a3e;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.player-avatar-mini:hover {
+  border-color: #4caf50;
+}
+
+.player-avatar-mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+/* Hide name/location — no room */
+.player-info {
+  display: none;
+}
+
+/* ========== SECTION CONTENT PANEL ========== */
+/* Slides out from sidebar, overlays content — no layout push */
+.section-content-area {
+  position: fixed;
+  left: 56px;
+  top: 0;
+  bottom: 0;
+  width: 340px;
+  z-index: 190;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Only show when there's content */
+.section-content-area:empty {
+  display: none;
+}
+
+.section-content-area > * {
+  pointer-events: all;
+  height: 100%;
+  overflow-y: auto;
+  background: #111118;
+  border-right: 2px solid #1e1e2e;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+  animation: panelSlideIn 0.18s ease-out;
+}
+
+@keyframes panelSlideIn {
+  from { transform: translateX(-12px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+/* ---- Generic section panels ---- */
+.section-panel {
+  padding: 20px 16px;
+  color: #c0c0e0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  line-height: 1.8;
+}
+
+.section-panel h3 {
+  font-size: 10px;
+  color: #4caf50;
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #1e1e2e;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.party-member {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #0d0d14;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  border: 1px solid #1e1e2e;
+}
+
+.party-name { flex: 1; font-size: 8px; color: #e0e0e0; }
+.party-level { font-size: 7px; color: #666; }
+
+.party-hp {
+  width: 50px;
+  height: 4px;
+  background: #1e1e2e;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.party-hp-fill {
+  height: 100%;
+  background: #4caf50;
+}
+
+.battle-stats p,
+.inventory-list p {
+  padding: 6px 0;
+  border-bottom: 1px solid #1a1a2e;
+  color: #888;
+}
+
+.battle-stats p span,
+.inventory-list p span {
+  color: #e0e0e0;
+}
+
+.task-item {
+  padding: 8px 10px;
+  background: #0d0d14;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  border: 1px solid #1e1e2e;
+  color: #888;
+  font-size: 8px;
+}
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #0d0d14;
+  border: 1px solid #1e1e2e;
+  border-radius: 4px;
+  color: #888;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .game-sidebar {
+    width: 50px;
+  }
+  .section-content-area {
+    left: 50px;
+    width: 280px;
+  }
+}

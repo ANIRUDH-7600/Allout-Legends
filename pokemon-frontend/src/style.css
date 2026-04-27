@@ -19,7 +19,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
 }
 
 .layout {
@@ -35,7 +34,7 @@ body {
 }
 
 .realm-bar {
-  width: 640px;
+  width: 900px;
   height: 44px;
   border-radius: 22px;
   background: #ececee;
@@ -75,8 +74,8 @@ body {
 }
 
 .viewport {
-  width: 640px;
-  height: 480px;
+  width: 900px;
+  height: calc(100vh - 68px); /* full height minus realm-bar */
   overflow: hidden;
   position: relative;
   background: #b6f09e;
@@ -112,7 +111,8 @@ body {
 
 .deluge-panel {
   width: 290px;
-  height: 480px;
+  margin-top:54px;
+  height: calc(100vh - 69px);
   background: #d6d8de;
   border-radius: 22px;
   border: 3px solid #2f2f34;
@@ -354,7 +354,6 @@ body {
   position: relative;
 }
 
-/* Enemy side */
 .enemy-area {
   position: absolute;
   top: 20px;
@@ -415,7 +414,6 @@ body {
   50% { transform: translateY(-6px); }
 }
 
-/* Player side */
 .player-battle-area {
   position: absolute;
   bottom: 20px;
@@ -439,7 +437,6 @@ body {
   min-width: 180px;
 }
 
-/* Battle UI panel */
 .battle-ui {
   height: 140px;
   background: #f5f5dc;
@@ -499,7 +496,6 @@ body {
   border-color: #222;
 }
 
-/* cursor triangle */
 .battle-btn.selected::before {
   content: '▶';
   font-size: 8px;
