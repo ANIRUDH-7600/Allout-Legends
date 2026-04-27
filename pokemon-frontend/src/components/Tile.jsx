@@ -19,7 +19,8 @@ export default function Tile({ type, onClick, onContextMenu, onMouseEnter, onMou
     );
   }
 
-  if (scale >= 1) {
+  // For exact default scale, render the base style directly for best pixel alignment.
+  if (scale === 1) {
     return (
       <div
         className="tile"
@@ -33,6 +34,8 @@ export default function Tile({ type, onClick, onContextMenu, onMouseEnter, onMou
     );
   }
 
+  // For any non-default scale (smaller or larger), render inside a 40px box and
+  // center a scaled inner tile so increases >100% are visible and persisted.
   return (
     <div
       className="tile"

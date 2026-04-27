@@ -24,10 +24,10 @@ export const TILESET_META = {
 };
 export const TILESET_COLS = 16;
 export const TILESET_ROWS = 16;
-export const TILESET_MAX_ID = 1791; // Update to cover all tiles (0-1082)
+export const TILESET_MAX_ID = 1105; // Update to cover all tiles (0-2601)
 
 export function clampTileId(rawId) {
-  return Math.max(0, Math.min(1082, rawId));
+  return Math.max(0, Math.min(TILESET_MAX_ID, rawId));
 }
 
 export { 

@@ -124,21 +124,39 @@ export default function MapEditor({
             <span className="meta-label" style={{ fontSize: "7px" }}>
               🔍 Sprite Scale (per tile)
             </span>
-            <button
-              type="button"
-              className="paint-action-btn"
-              style={{ minWidth: "36px", height: "18px", fontSize: "7px" }}
-              onClick={() => setPendingScale(1)}
-            >
-              Reset
-            </button>
+            <div style={{ display: "flex", gap: "6px" }}>
+              <button
+                type="button"
+                className="paint-action-btn"
+                style={{ minWidth: "28px", height: "18px", fontSize: "7px" }}
+                onClick={() => setPendingScale((s) => Math.max(0.1, +(s - 0.05).toFixed(2)))}
+              >
+                -
+              </button>
+              <button
+                type="button"
+                className="paint-action-btn"
+                style={{ minWidth: "36px", height: "18px", fontSize: "7px" }}
+                onClick={() => setPendingScale(1)}
+              >
+                Reset
+              </button>
+              <button
+                type="button"
+                className="paint-action-btn"
+                style={{ minWidth: "28px", height: "18px", fontSize: "7px" }}
+                onClick={() => setPendingScale((s) => Math.min(1.5, +(s + 0.05).toFixed(2)))}
+              >
+                +
+              </button>
+            </div>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             <input
               type="range"
               min={0.1}
-              max={1}
+              max={1.5}
               step={0.05}
               value={displayScale}
               onChange={(e) => setPendingScale(parseFloat(e.target.value))}

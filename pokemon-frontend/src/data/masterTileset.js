@@ -3,19 +3,34 @@
 export const MASTER_TILESET = {
   renderSize: 40,
   tilesets: [
-    // fence-snow.png: 256x352px → 8 cols × 11 rows = 88 tiles (IDs 0-87)
+    // crops: 5x5 grid = 25 tiles (IDs 0-24)
     {
-      id: "fence-snow",
-      name: "Fence Snow",
-      imagePath: "/assets/tiles/fence-snow.png",
+      id: "crops",
+      name: "Crops",
+      imagePath: "/assets/tiles/crop.png",
       tileWidth: 32,
       tileHeight: 32,
-      columns: 8,
+      columns: 5,
       startId: 0,
-      endId: 87,
+      endId: 24,
       walkable: false,
       encounterRate: 0,
-      description: "Snow fences and borders"
+      description: "Crop tiles (25) — small plants and farmland"
+    },
+
+    // path: 5x5 grid = 25 tiles (IDs 25-49)
+    {
+      id: "path",
+      name: "Path",
+      imagePath: "/assets/tiles/path.png",
+      tileWidth: 32,
+      tileHeight: 32,
+      columns: 5,
+      startId: 25,
+      endId: 49,
+      walkable: true,
+      encounterRate: 0,
+      description: "Path and road tiles"
     },
 
     // ground.png: 640x224px → 20 cols × 7 rows = 140 tiles (IDs 88-227)
@@ -123,20 +138,19 @@ export const MASTER_TILESET = {
       description: "Regular trees and foliage"
     },
 
-    // triggers: 6 tiles (IDs 1071-1080)
+    // plants: 5x5 grid = 25 tiles (IDs 1081-1105)
     {
-      id: "triggers",
-      name: "Triggers",
-      imagePath: "/assets/tiles/triggers.png",
+      id: "plants",
+      name: "Plants",
+      imagePath: "/assets/tiles/Plants.png",
       tileWidth: 32,
       tileHeight: 32,
-      columns: 6,
-      startId: 1071,
-      endId: 1080,
-      walkable: true,
+      columns: 5,
+      startId: 1081,
+      endId: 1105,
+      walkable: false,
       encounterRate: 0,
-      isTrigger: true,
-      description: "Event triggers (invisible)"
+      description: "Plants, flowers, vegetation, and foliage"
     }
   ]
 };

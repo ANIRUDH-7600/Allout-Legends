@@ -98,7 +98,7 @@ export default function Game() {
   
   // Sidebar state
   const [activeSection, setActiveSection] = useState("profile");
-  const [party, setParty] = useState([
+  const [party] = useState([
     { id: "PIKACHU", name: "Pikachu", level: 10, hp: 50, maxHp: 50 }
   ]);
   
@@ -126,7 +126,9 @@ export default function Game() {
     setTileScalesState((prev) => {
       const mapScales = { ...(prev[mapName] || {}) };
       const key = `${x},${y}`;
-      if (scale >= 1) {
+      // Preserve scales that differ from default (1).
+      // Previously scales >= 1 were removed which prevented storing increases >100%.
+      if (scale === 1) {
         delete mapScales[key];
       } else {
         mapScales[key] = scale;

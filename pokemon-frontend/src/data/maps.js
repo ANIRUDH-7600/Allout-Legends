@@ -1,7 +1,7 @@
 // pokemon-frontend/src/data/maps.js
 //
 // Tile ID reference (from masterTileset.js):
-//   fence-snow  : 0   – 87   (non-walkable, fence-snow.png, 8 cols)
+//   crops       : 0   – 24   (non-walkable, Crops.png, 5 cols)
 //   ground      : 88  – 227  (walkable,     ground.png,     20 cols)
 //   houses-snow : 228 – 395  (non-walkable, houses-snow.png)
 //   houses      : 396 – 720  (non-walkable, houses.png)
@@ -9,7 +9,6 @@
 //   rocks       : 753 – 856  (non-walkable, rocks.png, 8 cols)
 //   trees-snow  : 857 – 926  (non-walkable)
 //   trees       : 927 – 1070 (non-walkable, trees4.png)
-//   triggers    : 1071– 1080 (walkable)
 //
 // ── Commonly used tile IDs ─────────────────────────────
 //   GRASS        = 88   (ground_0,  green grass base)
@@ -24,7 +23,7 @@
 //   ROCK3        = 755  (rocks_2)
 //   ROCK_DARK    = 761  (rocks_8)
 //   ROCK_BIG     = 769  (rocks_16)
-//   FENCE        = 0    (fence-snow_0)
+//   CROP_0       = 0    (crop_0)
 
 const G   = 88;   // grass (walkable, ground.png)
 const G2  = 89;   // grass variant
@@ -42,7 +41,8 @@ const TREE= 927;  // tree (non-walkable, trees4.png)
 const TR2 = 928;
 const TR3 = 929;
 const TR4 = 930;
-const FNC = 0;    // fence-snow (non-walkable)
+const CROP = 0;   // crops (non-walkable)
+const FNC = 753;  // fence (use rocks as fence replacement since fence-snow deleted)
 
 const SIZE = 30;
 
@@ -97,11 +97,11 @@ function setTile(targetMap, x, y, tileId) {
   }
 }
 
-function applyTileOverrides(targetMap, overrides) {
-  overrides.forEach(([x, y, tileId]) => {
-    setTile(targetMap, x, y, tileId);
-  });
-}
+// Unused: function applyTileOverrides(targetMap, overrides) {
+//   overrides.forEach(([x, y, tileId]) => {
+//     setTile(targetMap, x, y, tileId);
+//   });
+// }
 
 function carveSideGate(targetMap, side, fromY, toY, value = G) {
   const x = side === "left" ? 0 : targetMap[0].length - 1;

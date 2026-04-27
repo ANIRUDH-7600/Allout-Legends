@@ -61,7 +61,7 @@ A browser-based Pokémon-style game built with **React + Vite**, featuring a til
 
 | Tileset     | ID Range  |
 | ----------- | --------- |
-| fence-snow  | 0–87      |
+| crops       | 0–24      |
 | ground      | 88–227    |
 | houses-snow | 228–395   |
 | houses      | 396–720   |
@@ -69,7 +69,7 @@ A browser-based Pokémon-style game built with **React + Vite**, featuring a til
 | rocks       | 753–856   |
 | trees-snow  | 857–926   |
 | trees       | 927–1070  |
-| triggers    | 1071–1082 |
+| plants      | 1081–1105 |
 
 ---
 
