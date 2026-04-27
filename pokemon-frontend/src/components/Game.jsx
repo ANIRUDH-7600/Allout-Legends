@@ -9,7 +9,7 @@ import { clampTileId, TILESET_MAX_ID } from "../data/tilesetMeta";
 import { movePlayer } from "../logic/movement";
 import { checkEncounter } from "../logic/encounter";
 
-const TILE = 64;
+const TILE = 40;
 const VIEWPORT_W = 900;
 // Height is dynamic (100vh - 68px), use a generous default for camera calc
 const VIEWPORT_H = typeof window !== 'undefined' ? window.innerHeight - 68 : 700;
@@ -71,10 +71,10 @@ export default function Game() {
         return JSON.parse(saved);
       } catch (e) {
         console.error("Failed to parse player position:", e);
-        return { x: 2, y: 2 };
+        return { x: 5, y: 5 };
       }
     }
-    return { x: 2, y: 2 };
+    return { x: 5, y: 5 };
   };
 
   const getInitialCurrentMap = () => {
@@ -108,7 +108,7 @@ export default function Game() {
     applySavedOverridesToMaps(savedLog);
     return savedLog;
   });
-
+  
   // tileScales: { [mapName]: { "x,y": scale } } — per map, per position
   const [tileScales, setTileScalesState] = useState(() => {
     try {
@@ -119,13 +119,9 @@ export default function Game() {
     }
   });
 
-  // The scale value that will be stamped onto the next painted tile
   const [pendingScale, setPendingScale] = useState(1);
-
-  // Which tile is currently hovered in paint mode (for UI feedback)
   const [hoveredTile, setHoveredTile] = useState(null);
 
-  // Set scale for a specific map position
   const setPositionScale = useCallback((mapName, x, y, scale) => {
     setTileScalesState((prev) => {
       const mapScales = { ...(prev[mapName] || {}) };
@@ -299,7 +295,6 @@ export default function Game() {
       const eraseId = 0;
       maps[currentMap][y][x] = eraseId;
       upsertEntries([{ x, y, id: eraseId }]);
-      // Reset scale for erased tile position
       setPositionScale(currentMap, x, y, 1);
       setFillStart(null);
       return;
@@ -338,7 +333,6 @@ export default function Game() {
 
     maps[currentMap][y][x] = clampedTileId;
     upsertEntries([{ x, y, id: clampedTileId }]);
-    // Stamp the current pending scale onto this specific position
     setPositionScale(currentMap, x, y, pendingScale);
     setFillStart(null);
   }, [paintMode, current, selectedTileId, currentMap, fillStart, pendingScale, setPositionScale]);
@@ -400,7 +394,7 @@ export default function Game() {
       localStorage.removeItem(STORAGE_KEYS.PLAYER_POS);
       setPaintLog({ map1: [], map2: [], map5: [], map6: [] });
       setCurrentMap("map1");
-      setPlayer({ x: 2, y: 2 });
+      setPlayer({ x: 5, y: 5 });
       window.location.reload();
     }
   }, []);

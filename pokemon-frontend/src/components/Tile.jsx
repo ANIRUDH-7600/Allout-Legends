@@ -1,16 +1,15 @@
 // pokemon-frontend/src/components/Tile.jsx
-
 import { getTileStyle } from "../data/masterTileset";
 
 export default function Tile({ type, onClick, onContextMenu, onMouseEnter, onMouseLeave, title, tileScale }) {
   const scale = tileScale ?? 1;
-  const baseStyle = getTileStyle(type, 64);
+  const baseStyle = getTileStyle(type, 40);
 
   if (!baseStyle || Object.keys(baseStyle).length === 0) {
     return (
       <div
         className="tile"
-        style={{ width: "64px", height: "64px", background: "#333", border: "1px solid #555" }}
+        style={{ width: "40px", height: "40px", background: "#333", border: "1px solid #555" }}
         onClick={onClick}
         onContextMenu={onContextMenu}
         onMouseEnter={onMouseEnter}
@@ -34,16 +33,17 @@ export default function Tile({ type, onClick, onContextMenu, onMouseEnter, onMou
     );
   }
 
-  // Tile cell stays 64×64; sprite shrinks inside it
   return (
     <div
       className="tile"
       onClick={onClick}
       onContextMenu={onContextMenu}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       title={title || `Tile ID: ${type} (scale: ${Math.round(scale * 100)}%)`}
       style={{
-        width: "64px",
-        height: "64px",
+        width: "40px",
+        height: "40px",
         position: "relative",
         overflow: "hidden",
         background: "transparent",

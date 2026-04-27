@@ -1,7 +1,7 @@
 // pokemon-frontend/src/data/masterTileset.js
 
 export const MASTER_TILESET = {
-  renderSize: 64,
+  renderSize: 40,
   tilesets: [
     // fence-snow.png: 256x352px → 8 cols × 11 rows = 88 tiles (IDs 0-87)
     {
@@ -174,7 +174,7 @@ export function getTileFrame(tileId) {
 }
 
 // Helper: Get CSS background style for a tile
-export function getTileStyle(tileId, renderSize = 64) {
+export function getTileStyle(tileId, renderSize = 40) {
   const frame = getTileFrame(tileId);
   if (!frame) return {};
 

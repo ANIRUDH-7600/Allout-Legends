@@ -94,8 +94,8 @@ body {
 
 .player {
   position: absolute;
-  width: 72px;
-  height: 72px;
+  width: 90px;
+  height: 87px;
   transform: translate(-50%, -66%);
   z-index: 10;
   pointer-events: none;
@@ -505,8 +505,8 @@ body {
 
 /* ── Tile styles ── */
 .tile {
-  width: 64px;
-  height: 64px;
+  width: 40px;
+  height: 40px;
   position: relative;
   background-repeat: no-repeat;
   image-rendering: pixelated;
