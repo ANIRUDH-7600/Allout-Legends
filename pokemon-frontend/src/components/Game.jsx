@@ -26,6 +26,77 @@ const STORAGE_KEYS = {
   TILE_SCALES: "allout_legends_tile_scales",
 };
 
+// Default tile scales baked in from allout_map_2026-04-27T18-53-50.json
+// These are used as a fallback when localStorage has no saved scales.
+const DEFAULT_TILE_SCALES = {
+  map1: {
+    "5,3": 1.25, "6,3": 1.25, "4,2": 1.1, "5,2": 1.1, "6,2": 1.1,
+    "4,1": 1.1, "5,1": 1.1, "6,1": 1.1, "5,0": 1.1, "4,0": 1.1,
+    "6,0": 1.1, "7,3": 1.25, "8,3": 1.25, "7,2": 1.1, "8,2": 1.1,
+    "8,1": 1.1, "7,1": 1.1, "7,0": 1.1, "8,0": 1.1, "9,0": 1.1,
+    "9,1": 1.1, "9,2": 1.1, "9,3": 1.25, "10,3": 1.25, "10,2": 1.1,
+    "10,1": 1.1, "10,0": 1.1, "4,6": 1.25, "4,7": 1.25, "4,8": 1.25,
+    "4,9": 1.25, "4,10": 1.25, "4,11": 1.25, "3,11": 1.25, "2,11": 1.25,
+    "1,11": 1.25, "0,11": 1.25, "0,10": 1.25, "1,10": 1.25, "2,10": 1.25,
+    "3,10": 1.25, "3,9": 1.25, "2,9": 1.25, "1,9": 1.25, "0,9": 1.25,
+    "0,8": 1.25, "1,8": 1.25, "2,8": 1.25, "3,8": 1.25, "3,7": 1.25,
+    "2,7": 1.25, "1,7": 1.25, "0,7": 1.25, "0,6": 1.25, "2,6": 1.25,
+    "3,6": 1.25, "15,6": 1.25, "15,7": 1.15, "16,7": 1.15, "16,6": 1.25,
+    "17,6": 1.25, "17,7": 1.15, "18,7": 1.15, "18,6": 1.25, "19,6": 1.25,
+    "19,7": 1.15, "20,7": 1.2, "20,6": 1.25, "21,6": 1.25, "21,7": 1.2,
+    "22,6": 1.25, "22,7": 1.2, "7,8": 1.25, "15,8": 1.15, "16,8": 1.15,
+    "17,8": 1.15, "20,8": 1.2, "21,8": 1.2, "22,8": 1.2, "10,10": 1.2,
+    "10,11": 1.2, "15,9": 1.15, "18,9": 1.15, "17,9": 1.15, "17,10": 1.2,
+    "17,11": 1.2, "17,12": 1.2, "17,13": 1.25, "7,16": 1.25, "7,17": 1.25,
+    "7,18": 1.25, "8,16": 1.25, "9,16": 1.25, "10,16": 1.25, "11,16": 1.25,
+    "12,16": 1.25, "13,16": 1.25, "16,17": 1.35, "16,18": 1.35, "17,18": 1.35,
+    "17,17": 1.35, "19,16": 1.25, "20,16": 1.25, "21,16": 1.25, "22,16": 1.25,
+    "22,17": 1.35, "22,18": 1.35, "21,18": 1.35, "21,17": 1.35, "20,17": 1.35,
+    "20,18": 1.35, "19,18": 1.35, "18,18": 1.35, "18,17": 1.35, "19,17": 1.35,
+    "7,6": 1.25, "7,7": 1.25, "8,6": 1.25, "9,6": 1.25, "10,6": 1.25,
+    "11,6": 1.25, "12,6": 1.25, "13,6": 1.25, "14,6": 1.25, "4,3": 1.25,
+    "14,7": 1.15, "7,9": 1.25, "7,10": 1.25, "7,11": 1.25, "7,12": 1.25,
+    "7,13": 1.25, "16,3": 1.25, "17,3": 1.25, "18,3": 1.25, "19,3": 1.25,
+    "20,3": 1.25, "21,3": 1.25, "22,3": 1.25, "16,0": 1.1, "17,0": 1.1,
+    "18,0": 1.1, "19,0": 1.1, "20,0": 1.1, "21,0": 1.1, "22,0": 1.1,
+    "13,17": 1.05, "13,18": 1.05, "12,17": 1.05, "12,18": 1.05, "11,17": 1.05,
+    "10,17": 1.05, "9,17": 1.05, "8,17": 1.05, "8,18": 1.05, "9,18": 1.05,
+    "10,18": 1.05, "11,18": 1.05, "14,9": 1.15, "13,9": 1.15, "12,9": 1.15,
+    "10,9": 1.15, "11,9": 1.15, "8,9": 1.15, "8,7": 1.15, "9,7": 1.15,
+    "9,8": 1.15, "8,8": 1.15, "9,9": 1.15, "10,7": 1.15, "10,8": 1.15,
+    "11,8": 1.15, "11,7": 1.15, "12,7": 1.15, "12,8": 1.15, "9,10": 1.2,
+    "8,10": 1.2, "8,11": 1.2, "9,11": 1.2, "13,8": 1.15, "13,7": 1.15,
+    "14,8": 1.15, "16,9": 1.15, "18,8": 1.15, "19,9": 1.15, "19,8": 1.15,
+    "8,13": 1.25, "9,13": 1.25, "18,13": 1.25, "19,13": 1.25, "16,13": 1.25,
+    "16,12": 1.2, "16,11": 1.2, "16,10": 1.2, "18,12": 1.2, "19,12": 1.2,
+    "18,11": 1.2, "18,10": 1.2, "19,10": 1.2, "19,11": 1.2, "8,12": 1.2,
+    "9,12": 1.2, "15,4": 1.3, "15,5": 1.3, "14,4": 1.3, "14,5": 1.3,
+    "16,5": 1.3, "16,4": 1.3, "17,4": 1.3, "17,5": 1.3, "19,5": 1.3,
+    "18,4": 1.3, "18,5": 1.3, "19,4": 1.3, "20,4": 1.3, "20,5": 1.3,
+    "21,5": 1.3, "21,4": 1.3, "22,4": 1.3, "22,5": 1.3, "13,4": 1.3,
+    "13,5": 1.3, "12,4": 1.3, "12,5": 1.3, "11,4": 1.3, "11,5": 1.3,
+    "10,4": 1.3, "10,5": 1.3, "9,4": 1.3, "8,4": 1.3, "7,4": 1.3,
+    "6,4": 1.3, "4,4": 1.3, "3,4": 1.3, "2,4": 1.3, "1,4": 1.3,
+    "0,4": 1.3, "0,5": 1.3, "1,5": 1.3, "2,5": 1.3, "3,5": 1.3,
+    "4,5": 1.3, "5,4": 1.3, "5,5": 1.3, "6,5": 1.3, "7,5": 1.3,
+    "8,5": 1.3, "9,5": 1.3, "16,16": 1.25, "17,16": 1.25, "18,16": 1.25,
+    "16,2": 1.1, "17,2": 1.1, "16,1": 1.1, "17,1": 1.1, "22,1": 1.1,
+    "22,2": 1.1, "21,2": 1.1, "21,1": 1.1, "20,1": 1.1, "19,1": 1.1,
+    "18,1": 1.1, "18,2": 1.1, "19,2": 1.1, "20,2": 1.1, "1,6": 1.25,
+    "4,12": 1.25, "4,13": 1.25, "4,16": 1.25, "4,17": 1.25, "4,18": 1.25,
+    "0,12": 1.25, "1,12": 1.25, "2,12": 1.25, "3,12": 1.25, "3,13": 1.25,
+    "2,13": 1.25, "1,13": 1.25, "0,13": 1.25, "0,14": 1.25, "0,15": 1.25,
+    "0,16": 1.25, "0,17": 1.25, "0,18": 1.25, "1,18": 1.25, "2,18": 1.25,
+    "3,18": 1.25, "3,17": 1.25, "3,16": 1.25, "3,15": 1.25, "3,14": 1.25,
+    "2,14": 1.25, "1,14": 1.25, "1,15": 1.25, "2,15": 1.25, "2,16": 1.25,
+    "1,16": 1.25, "1,17": 1.25, "2,17": 1.25, "5,14": 1.5, "6,14": 1.5,
+    "6,15": 1.5, "5,15": 1.5, "4,14": 1.5, "4,15": 1.5, "20,13": 1.25,
+    "21,13": 1.25, "22,13": 1.25, "20,9": 1.2, "20,10": 1.2, "20,11": 1.2,
+    "20,12": 1.2, "21,12": 1.2, "22,12": 1.2, "21,11": 1.2, "22,11": 1.2,
+    "21,10": 1.2, "21,9": 1.2, "22,9": 1.2, "22,10": 1.2,
+  },
+};
+
 function isAtSideGate(y) {
   return y >= SIDE_GATE_Y_MIN && y <= SIDE_GATE_Y_MAX;
 }
@@ -110,12 +181,19 @@ export default function Game() {
   });
   
   // tileScales: { [mapName]: { "x,y": scale } } — per map, per position
+  // Merges baked-in defaults with any saved overrides from localStorage.
   const [tileScales, setTileScalesState] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.TILE_SCALES);
-      return saved ? JSON.parse(saved) : {};
+      const fromStorage = saved ? JSON.parse(saved) : {};
+      // Deep merge: storage values win over defaults (so editor changes persist)
+      const merged = { ...DEFAULT_TILE_SCALES };
+      Object.keys(fromStorage).forEach(mapName => {
+        merged[mapName] = { ...(DEFAULT_TILE_SCALES[mapName] || {}), ...fromStorage[mapName] };
+      });
+      return merged;
     } catch {
-      return {};
+      return { ...DEFAULT_TILE_SCALES };
     }
   });
 
@@ -410,9 +488,10 @@ export default function Game() {
     }
     
     const exportData = {
-      version: "1.0",
+      version: "1.1",
       createdAt: new Date().toISOString(),
       edits: paintLog,
+      tileScales: tileScales,
       metadata: { currentMap, playerPos: player, totalEdits }
     };
     
@@ -446,9 +525,11 @@ export default function Game() {
         try {
           const imported = JSON.parse(event.target.result);
           let importedEdits;
+          let importedScales = null;
           
           if (imported.version && imported.edits) {
             importedEdits = imported.edits;
+            importedScales = imported.tileScales || null;
           } else if (imported.map1 || imported.map2 || imported.map5 || imported.map6) {
             importedEdits = imported;
           } else {
@@ -469,6 +550,11 @@ export default function Game() {
           
           setPaintLog(importedEdits);
           localStorage.setItem(STORAGE_KEYS.PAINT_LOG, JSON.stringify(importedEdits));
+
+          if (importedScales) {
+            setTileScalesState(importedScales);
+            localStorage.setItem(STORAGE_KEYS.TILE_SCALES, JSON.stringify(importedScales));
+          }
           
           const totalEdits = Object.values(importedEdits).reduce((sum, arr) => sum + arr.length, 0);
           setExportStatus(`✅ Imported ${totalEdits} tile edits!`);
@@ -496,7 +582,12 @@ export default function Game() {
       return;
     }
 
-    const block = `${currentMap}: [\n${entries.map((entry) => `  [${entry.x}, ${entry.y}, ${entry.id}],`).join("\n")}\n],`;
+    const mapScales = tileScales[currentMap] || {};
+    const block = `${currentMap}: [\n${entries.map((entry) => {
+      const scale = mapScales[`${entry.x},${entry.y}`];
+      const scalePart = scale && scale !== 1 ? `, scale: ${scale}` : "";
+      return `  [${entry.x}, ${entry.y}, ${entry.id}${scalePart ? ` /*${scalePart} */` : ""}],`;
+    }).join("\n")}\n],`;
 
     try {
       await navigator.clipboard.writeText(block);
@@ -506,7 +597,7 @@ export default function Game() {
       console.log(block);
       setExportStatus("Clipboard blocked. Block printed to console.");
     }
-  }, [paintLog, currentMap]);
+  }, [paintLog, currentMap, tileScales]);
 
   const clearPaintLogForCurrentMap = useCallback(() => {
     setPaintLog((prev) => ({ ...prev, [currentMap]: [] }));
