@@ -12,7 +12,7 @@ import {
 // Re-export for backward compatibility
 export const TILE_RENDER_SIZE = 64;
 export const TILESET_META = {
-  imagePath: "/assets/tiles/ground.png",
+  imagePath: "/assets/tiles/houses.png",
   atlasWidth: 512,
   atlasHeight: 512,
   tileWidth: 32,

@@ -1,5 +1,5 @@
 // pokemon-frontend/src/logic/movement.js
-import { isWalkable } from "../data/masterTileset";
+import { isTileWalkable } from "../data/tileWalkability";
 
 export function movePlayer(player, key, map) {
   let newX = player.x;
@@ -16,8 +16,7 @@ export function movePlayer(player, key, map) {
 
   const tileId = map[newY][newX];
 
-  // Use dynamic walkability from master tileset
-  if (isWalkable(tileId)) {
+  if (isTileWalkable(tileId)) {
     return { x: newX, y: newY };
   }
 

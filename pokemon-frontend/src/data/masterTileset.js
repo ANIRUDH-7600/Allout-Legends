@@ -1,5 +1,7 @@
 // pokemon-frontend/src/data/masterTileset.js
 
+import { isTileWalkable } from "./tileWalkability";
+
 export const MASTER_TILESET = {
   renderSize: 40,
   tilesets: [
@@ -18,49 +20,19 @@ export const MASTER_TILESET = {
       description: "Crop tiles (25) — small plants and farmland"
     },
 
-    // path: 5x5 grid = 25 tiles (IDs 25-49)
+    // path: 6x6 grid = 36 tiles (IDs 25-60)
     {
       id: "path",
       name: "Path",
       imagePath: "/assets/tiles/path.png",
-      tileWidth: 32,
-      tileHeight: 32,
-      columns: 5,
+      tileWidth: 90,
+      tileHeight: 90,
+      columns: 6,
       startId: 25,
-      endId: 49,
+      endId: 60,
       walkable: true,
       encounterRate: 0,
-      description: "Path and road tiles"
-    },
-
-    // ground.png: 640x224px → 20 cols × 7 rows = 140 tiles (IDs 88-227)
-    {
-      id: "ground",
-      name: "Ground Terrain",
-      imagePath: "/assets/tiles/ground.png",
-      tileWidth: 32,
-      tileHeight: 32,
-      columns: 20,
-      startId: 88,
-      endId: 227,
-      walkable: true,
-      encounterRate: 0.08,
-      description: "Grass, dirt, sand, and natural ground"
-    },
-
-    // houses-snow.png: 672x256px → 21 cols × 8 rows = 168 tiles (IDs 228-395)
-    {
-      id: "houses-snow",
-      name: "Snow Houses",
-      imagePath: "/assets/tiles/houses-snow.png",
-      tileWidth: 32,
-      tileHeight: 32,
-      columns: 21,
-      startId: 228,
-      endId: 395,
-      walkable: false,
-      encounterRate: 0,
-      description: "Snow-covered buildings and structures"
+      description: "Path and road tiles (6x6, 90x90)"
     },
 
     // houses.png: 800x416px → 25 cols × 13 rows = 325 tiles (IDs 396-720)
@@ -76,66 +48,6 @@ export const MASTER_TILESET = {
       walkable: false,
       encounterRate: 0,
       description: "Regular buildings and structures"
-    },
-
-    // rock-snow: assume 8 cols (similar to rocks), 32 tiles (IDs 721-752)
-    {
-      id: "rock-snow",
-      name: "Snow Rocks",
-      imagePath: "/assets/tiles/rock-snow.png",
-      tileWidth: 32,
-      tileHeight: 32,
-      columns: 8,
-      startId: 721,
-      endId: 752,
-      walkable: false,
-      encounterRate: 0,
-      description: "Snow-covered rocks and boulders"
-    },
-
-    // rocks.png: 256x416px → 8 cols × 13 rows = 104 tiles (IDs 753-856)
-    {
-      id: "rocks",
-      name: "Rocks",
-      imagePath: "/assets/tiles/rocks.png",
-      tileWidth: 32,
-      tileHeight: 32,
-      columns: 8,
-      startId: 753,
-      endId: 856,
-      walkable: false,
-      encounterRate: 0,
-      description: "Rocks, boulders, and stone features"
-    },
-
-    // trees-snow: 70 tiles — assume 10 cols (IDs 857-926)
-    {
-      id: "trees-snow",
-      name: "Snow Trees",
-      imagePath: "/assets/tiles/trees-snow.png",
-      tileWidth: 32,
-      tileHeight: 32,
-      columns: 10,
-      startId: 857,
-      endId: 926,
-      walkable: false,
-      encounterRate: 0,
-      description: "Snow-covered trees"
-    },
-
-    // trees4.png: 144 tiles — assume 12 cols (IDs 927-1070)
-    {
-      id: "trees",
-      name: "Trees",
-      imagePath: "/assets/tiles/trees4.png",
-      tileWidth: 32,
-      tileHeight: 32,
-      columns: 12,
-      startId: 927,
-      endId: 1070,
-      walkable: false,
-      encounterRate: 0,
-      description: "Regular trees and foliage"
     },
 
     // plants: 5x5 grid = 25 tiles (IDs 1081-1105)
@@ -182,7 +94,7 @@ export function getTileFrame(tileId) {
     y: row * tileset.tileHeight,
     width: tileset.tileWidth,
     height: tileset.tileHeight,
-    walkable: tileset.walkable,
+    walkable: isTileWalkable(tileId),
     encounterRate: tileset.encounterRate,
   };
 }
@@ -215,8 +127,7 @@ export function getTileStyle(tileId, renderSize = 40) {
 
 // Check if a tile is walkable
 export function isWalkable(tileId) {
-  const tileset = findTileset(tileId);
-  return tileset ? tileset.walkable : false;
+  return isTileWalkable(tileId);
 }
 
 // Get encounter rate for a tile

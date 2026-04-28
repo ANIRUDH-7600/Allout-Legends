@@ -1,6 +1,7 @@
 // pokemon-frontend/src/components/TileViewer.jsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { MASTER_TILESET, getTileStyle } from '../data/masterTileset';
+import { isTileWalkable } from '../data/tileWalkability';
 
 export default function TileViewer({ onClose, onSelectTile }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,7 +19,7 @@ export default function TileViewer({ onClose, onSelectTile }) {
         id: id,
         tileset: tileset.id,
         name: tileset.name,
-        walkable: tileset.walkable,
+        walkable: isTileWalkable(id),
         encounterRate: tileset.encounterRate
       });
     }
