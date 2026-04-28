@@ -367,6 +367,24 @@
   position: relative;
 }
 
+.avatar-modal.skin-modal {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  border-radius: 0;
+  border: none;
+}
+
+.skin-modal .close-modal.skin-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 5;
+  background: rgba(8,8,15,.6);
+  border-color: var(--border-mid);
+}
+
 /* Corner marks on modal */
 .avatar-modal::before,
 .avatar-modal::after {

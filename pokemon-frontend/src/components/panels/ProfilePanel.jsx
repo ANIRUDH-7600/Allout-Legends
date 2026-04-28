@@ -1,61 +1,17 @@
 // pokemon-frontend/src/components/panels/ProfilePanel.jsx
 import { useState } from 'react';
 import './Panel.css';
+import SkinPanel from './SkinPanel';
 
-export default function ProfilePanel({ player, onAvatarChange }) {
-  const [showAvatarModal, setShowAvatarModal] = useState(false);
-  const [selectedAvatar, setSelectedAvatar] = useState(() => {
+export default function ProfilePanel({ player }) {
+  const [showSkinModal, setShowSkinModal] = useState(false);
+  const [selectedAvatar] = useState(() => {
     return localStorage.getItem('selected_avatar') || '/assets/heros/Alpha_Coder.png';
   });
-
-  const avatars = [
-    {
-      id: 'ace_stalker',
-      name: 'Ace Stalker',
-      path: '/assets/heros/Ace_Stalker.png',
-      rarity: 'epic',
-      description: 'Tracks targets across all realms',
-    },
-    {
-      id: 'alpha_coder',
-      name: 'Alpha Coder',
-      path: '/assets/heros/Alpha_Coder.png',
-      rarity: 'legendary',
-      description: 'Master of the digital realm',
-    },
-    {
-      id: 'bamboo_hunter',
-      name: 'Bamboo Hunter',
-      path: '/assets/heros/Bamboo_Hunter.png',
-      rarity: 'rare',
-      description: 'Silent as forest, swift as storm',
-    },
-    {
-      id: 'love_seeker',
-      name: 'Love Seeker',
-      path: '/assets/heros/Love_Seeker.png',
-      rarity: 'rare',
-      description: 'Fights with heart and soul',
-    },
-    {
-      id: 'rizz_cr',
-      name: 'Rizz CR',
-      path: '/assets/heros/Rizz_CR.png',
-      rarity: 'epic',
-      description: 'Charms even wild Pokémon',
-    },
-  ];
 
   const getRealmNumber = () => {
     const map = { map1: 1, map2: 2, map5: 5, map6: 6 };
     return map[player?.mapId] ?? 1;
-  };
-
-  const handleAvatarSelect = (avatar) => {
-    setSelectedAvatar(avatar.path);
-    localStorage.setItem('selected_avatar', avatar.path);
-    if (onAvatarChange) onAvatarChange(avatar.path);
-    setShowAvatarModal(false);
   };
 
   const menuItems = [
@@ -84,7 +40,7 @@ export default function ProfilePanel({ player, onAvatarChange }) {
             <div className="avatar-status" title="Online" />
             <button
               className="avatar-change-btn"
-              onClick={() => setShowAvatarModal(true)}
+              onClick={() => setShowSkinModal(true)}
             >
               Change
             </button>
@@ -152,50 +108,22 @@ export default function ProfilePanel({ player, onAvatarChange }) {
         ))}
       </div>
 
-      {/* ── AVATAR MODAL ───────────────────────────────────── */}
-      {showAvatarModal && (
+      {/* ── SKIN PANEL MODAL ───────────────────────────────── */}
+      {showSkinModal && (
         <div
           className="avatar-modal-overlay"
-          onClick={() => setShowAvatarModal(false)}
+          onClick={() => setShowSkinModal(false)}
         >
-          <div className="avatar-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="avatar-modal-header">
-              <h3>Select Hero</h3>
-              <button
-                className="close-modal"
-                onClick={() => setShowAvatarModal(false)}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </div>
+          <div className="avatar-modal skin-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="close-modal skin-modal-close"
+              onClick={() => setShowSkinModal(false)}
+              aria-label="Close"
+            >
+              ✕
+            </button>
 
-            <div className="avatar-grid-scroll">
-              <div className="avatar-grid">
-                {avatars.map((avatar) => (
-                  <div
-                    key={avatar.id}
-                    className={`avatar-option ${selectedAvatar === avatar.path ? 'selected' : ''}`}
-                    onClick={() => handleAvatarSelect(avatar)}
-                  >
-                    <img
-                      src={avatar.path}
-                      alt={avatar.name}
-                      onError={(e) => { e.target.src = '/assets/heros/Alpha_Coder.png'; }}
-                    />
-                    <div className="avatar-name">{avatar.name}</div>
-                    <div className={`avatar-rarity ${avatar.rarity}`}>
-                      {avatar.rarity}
-                    </div>
-                    <div className="avatar-description">{avatar.description}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="avatar-modal-footer">
-              <p>More heroes unlock as you progress</p>
-            </div>
+            <SkinPanel title="ALLOUT LEGENDS" quantity={8} />
           </div>
         </div>
       )}
